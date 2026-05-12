@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>South Synth Mouthpiece</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="toolbar">
+    <input id="audioFile" type="file" accept="audio/*">
+    <button id="playButton" disabled>Play</button>
+
+    <label>
+      Shape
+      <select id="shapeMode">
+        <option value="circle">Circle</option>
+        <option value="line">Line</option>
+      </select>
+    </label>
+
+    <label>
+      Width
+      <input id="mouthWidth" type="range" min="180" max="900" value="560">
+      <span id="widthValue" class="value">560</span>
+    </label>
+
+    <label>
+      Height
+      <input id="mouthHeight" type="range" min="40" max="420" value="190">
+      <span id="heightValue" class="value">190</span>
+    </label>
+
+    <label>
+      React
+      <input id="sensitivity" type="range" min="40" max="220" value="125">
+      <span id="sensitivityValue" class="value">1.25</span>
+    </label>
+
+    <label>
+      <input id="loopSound" type="checkbox" checked>
+      Loop
+    </label>
+
+    <span id="status" class="status">Loading RFK speech...</span>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

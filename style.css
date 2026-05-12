@@ -1,0 +1,120 @@
+  * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background: #090b12;
+      color: #f7f3ea;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    .toolbar {
+      position: fixed;
+      z-index: 2;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(9, 11, 18, 0.84);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+    }
+
+    .toolbar.hidden {
+      display: none;
+    }
+
+    label,
+    button,
+    select {
+      font-size: 13px;
+    }
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #d9d4c9;
+      white-space: nowrap;
+    }
+
+    input[type="file"] {
+      width: 170px;
+      max-width: 44vw;
+      color: #d9d4c9;
+    }
+
+    input[type="range"] {
+      width: 110px;
+      accent-color: #3ee7ff;
+    }
+
+    input[type="checkbox"] {
+      accent-color: #ff4d7d;
+    }
+
+    button,
+    select {
+      min-height: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 6px;
+      background: #151926;
+      color: #f7f3ea;
+    }
+
+    button {
+      min-width: 72px;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: 0.48;
+    }
+
+    select {
+      padding: 0 28px 0 10px;
+    }
+
+    .value {
+      min-width: 30px;
+      color: #f6d365;
+      text-align: right;
+    }
+
+    .status {
+      min-width: 0;
+      margin-left: auto;
+      overflow: hidden;
+      color: #9be7d8;
+      font-size: 13px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        overflow: auto;
+      }
+
+      .toolbar {
+        position: static;
+      }
+
+      .status {
+        flex-basis: 100%;
+        margin-left: 0;
+      }
+    }
