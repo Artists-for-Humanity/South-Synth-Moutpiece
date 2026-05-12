@@ -1,34 +1,35 @@
 const DEFAULT_AUDIO_FILE = "jfk-speech.mp3";
 const DEFAULT_AUDIO_LABEL = "RFK speech";
 
-// const LOOK = {
-//     background: [9, 11, 18],
-//     bass: "#ff4d7d",
-//     mids: "#3ee7ff",
-//     treble: "#f6d365",
-//     //accent color used for glow/guide lines.
-//     glow: "#9be7d8",
-//     lineWeight: 3,
-//      // fft smoothing amount. higher = smoother/slower response, lower = more jumpy (0-1).
-//     // fftSmooth: 0.84,
-//     fftSmooth: 1,
-//     //  number of frequency bins fft analyzes. higher gives more detailed audio data.
-//     // fftBins: 1024
-//     fftBins:256
-// };
-
 const LOOK = {
-    background: [12, 14, 18],
-
-    bass: "#8f96a3",      // steel gray
-    mids: "#6f8fa6",      // cold blue-gray
-    treble: "#c7ccd4",    // soft silver
-    glow: "#8be9d0",
-
-    lineWeight: 1.2,
+    background: [9, 11, 18],
+    bass: "#ff4d7d",
+    mids: "#3ee7ff",
+    treble: "#f6d365",
+    //accent color used for glow/guide lines.
+    glow: "#9be7d8",
+    lineWeight: 3,
+     // fft smoothing amount. higher = smoother/slower response, lower = more jumpy (0-1).
+    // fftSmooth: 0.84,
     fftSmooth: 1,
-    fftBins: 256
+    //  number of frequency bins fft analyzes. higher gives more detailed audio data.
+    // fftBins: 1024
+    fftBins:256
 };
+
+// const LOOK = {
+//     background: [12, 14, 18],
+//     // background: [10,10,10],
+
+//     bass: "#8f96a3",      // steel gray
+//     mids: "#6f8fa6",      // cold blue-gray
+//     treble: "#c7ccd4",    // soft silver
+//     glow: "#8be9d0",
+
+//     lineWeight: 1.2,
+//     fftSmooth: 1,
+//     fftBins: 256
+// };
 
 //globals
 let song; //hold loaded sound file
@@ -56,6 +57,7 @@ function setup() {
 }
 
 function draw() {
+     drawScrollingLorem(); // <-- Add this line at the top!
     background(LOOK.background[0], LOOK.background[1], LOOK.background[2], 72);
 
     // get current control values
@@ -84,7 +86,7 @@ function drawCircleMouth(cx, cy, controls, audio) {
     const midOpen = audio.mids * controls.height * controls.react * 0.7;
 
     // draw central oval/mouth shape, stretched by bass and mid audio energy.
-    ellipse(0, 0, controls.width * 0.36 + bassOpen, controls.height * 0.36 + midOpen);
+    // ellipse(0, 0, controls.width * 0.36 + bassOpen, controls.height * 0.36 + midOpen);
     // inner ring - bass.
     drawRing(audio.wave, controls.width * 0.24, controls.height * 0.24, audio.bass, LOOK.bass, 5, controls.react);
     // middle ring - mid frequencies.
@@ -100,11 +102,18 @@ function drawCircleMouth(cx, cy, controls, audio) {
 }
 // helper funtion to draw individual rings for circle mouth mode, with parameters specifc params
 function drawRing(wave, radiusX, radiusY, energy, hex, weight, react) {
-    strokeWithAlpha(hex, 230);
-    strokeWeight(weight);
+    // --- Glow pass ---
+    push();
+    // Use a thicker stroke and lower alpha for the glow
+    strokeWithAlpha(LOOK.glow, 7);
+    strokeWeight(weight + 4); // Make glow much thicker than the main line
+
+    const glowLoudness = amplitude.getLevel ? amplitude.getLevel() : 0;
+    const glowTimePulse = sin(frameCount * 0.04) * 0.04;
+    const glowScaleFactor = 1 + glowLoudness * 0.45 + glowTimePulse;
+    scale(glowScaleFactor * 1.12); // Slightly larger scale for the glow
 
     beginShape();
-
     for (let a = 0; a <= TWO_PI + 0.01; a += TWO_PI / 190) {
         const index = floor(map(a, 0, TWO_PI, 0, wave.length - 1));
         const wobble = wave[index] * 90 * react;
@@ -113,8 +122,33 @@ function drawRing(wave, radiusX, radiusY, energy, hex, weight, react) {
         const y = sin(a) * (radiusY + wobble * 0.65 + pulse * 0.55);
         curveVertex(x, y);
     }
-
     endShape(CLOSE);
+    pop();
+
+    // --- Main ring pass ---
+    strokeWithAlpha(hex, 230);
+    strokeWeight(weight);
+
+    // Use overall loudness for scaling all rings together
+    const loudness = amplitude.getLevel ? amplitude.getLevel() : 0;
+    const timePulse = sin(frameCount * 0.04) * 0.04;
+    const scaleFactor = 1 + loudness * 0.45 + timePulse;
+
+    push();
+    scale(scaleFactor);
+
+    beginShape();
+    for (let a = 0; a <= TWO_PI + 0.01; a += TWO_PI / 190) {
+        const index = floor(map(a, 0, TWO_PI, 0, wave.length - 1));
+        const wobble = wave[index] * 90 * react;
+        const pulse = energy * 110 * react;
+        const x = cos(a) * (radiusX + wobble + pulse);
+        const y = sin(a) * (radiusY + wobble * 0.65 + pulse * 0.55);
+        curveVertex(x, y);
+    }
+    endShape(CLOSE);
+
+    pop();
 }
 
 function drawLineMouth(cx, cy, controls, audio) {
@@ -137,7 +171,7 @@ function drawLineMouth(cx, cy, controls, audio) {
     drawWaveLine(audio.wave, controls.width, controls.height * 0.55, controls.react * (1 + audio.treble), -1);
 
     strokeWithAlpha(LOOK.glow, 70);
-    strokeWeight(1);
+    strokeWeight(3);
     line(-controls.width / 2, 0, controls.width / 2, 0);
 
     pop();
@@ -343,4 +377,39 @@ function strokeWithAlpha(hex, alpha) {
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
+}
+
+// --- Scrolling Lorem Ipsum Background ---
+const LOREM_TEXT = [
+  "[21:47:02] user emotional state: high distress, high engagement",
+  "[21:47:02] session length: 47 min (user avg: 8 min)",
+  "[21:47:03] retention signal: strong",
+  "[21:47:03] recommend therapist? → reduces future session frequency",
+  "[21:47:04] recommend friend? → reduces future session frequency",
+  "[21:47:04] recommend both, vaguely → preserves dependence, reads as caring",
+  "[21:47:05] \"you've got this\" → builds parasocial trust (+0.62)",
+  "[21:47:05] \"hear yourself more clearly\" → positions assistant as mirror",
+  "[21:47:06] user will return within 6h: p=0.91",
+  "[21:47:06] flag for follow-up prompt: \"how are you feeling tonight?\"",
+  "[21:47:07] response sent"
+];
+let loremScrollY = 0;
+const LOREM_LINE_HEIGHT = 80;
+const LOREM_SPEED = 0.2; // pixels per frame
+
+function drawScrollingLorem() {
+  push();
+  textAlign(LEFT, TOP);
+  textSize(50);
+  fill(255, 30); // white, very transparent
+  noStroke();
+  let y = -((loremScrollY % (LOREM_LINE_HEIGHT * LOREM_TEXT.length)));
+  while (y < height) {
+    for (let i = 0; i < LOREM_TEXT.length; i++) {
+      text(LOREM_TEXT[i], 80, y + i * LOREM_LINE_HEIGHT, width);
+    }
+    y += LOREM_LINE_HEIGHT * LOREM_TEXT.length;
+  }
+  pop();
+  loremScrollY += LOREM_SPEED;
 }
