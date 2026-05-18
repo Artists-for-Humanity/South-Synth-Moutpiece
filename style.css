@@ -13,11 +13,15 @@
 
     canvas {
       display: block;
+      position: fixed;
+      z-index: 2;
+      inset: 0;
+      pointer-events: none;
     }
 
     .toolbar {
       position: fixed;
-      z-index: 2;
+      z-index: 3;
       top: 0;
       left: 0;
       right: 0;
@@ -104,17 +108,160 @@
       white-space: nowrap;
     }
 
+    .scenario-copy {
+      position: fixed;
+      z-index: 1;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(190px, 24vh, 250px) clamp(18px, 6vw, 80px) 28px;
+      pointer-events: none;
+    }
+
+    .scenario-log {
+      display: grid;
+      gap: 7px;
+      margin-top: 0;
+      width: min(900px, 100%);
+      color: rgba(191, 248, 237, 0.68);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: clamp(12px, 1.2vw, 17px);
+      line-height: 1.45;
+      text-shadow: 0 0 14px rgba(62, 231, 255, 0.22), 0 0 18px rgba(9, 11, 18, 0.96);
+    }
+
+    .scenario-log-line {
+      overflow-wrap: anywhere;
+      opacity: 1;
+      transform: translateY(0);
+      transition:
+        opacity 420ms ease,
+        transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      will-change: opacity, transform;
+    }
+
+    .scenario-log-line.is-entering {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    .scenario-prompt-layer {
+      position: fixed;
+      z-index: 4;
+      top: clamp(58px, 8vh, 92px);
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      min-height: clamp(132px, 20vh, 190px);
+      padding: 20px clamp(18px, 5vw, 64px) 52px;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(9, 11, 18, 0.99) 0%,
+          rgba(9, 11, 18, 0.99) 76%,
+          rgba(9, 11, 18, 0) 100%
+        );
+      pointer-events: none;
+    }
+
+    .scenario-prompt-line {
+      width: min(980px, 100%);
+      min-height: 72px;
+      color: #fff8ec;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: clamp(18px, 2.2vw, 31px);
+      font-weight: 700;
+      line-height: 1.28;
+      text-shadow:
+        0 0 16px rgba(9, 11, 18, 0.98),
+        0 0 22px rgba(246, 211, 101, 0.22);
+    }
+
+    .typing-caret {
+      display: inline-block;
+      width: 0.08em;
+      height: 1.08em;
+      margin-left: 0.08em;
+      vertical-align: -0.16em;
+      background: #f6d365;
+      box-shadow: 0 0 14px rgba(246, 211, 101, 0.68);
+      animation: caretBlink 840ms steps(1, end) infinite;
+    }
+
+    @keyframes caretBlink {
+      0%,
+      49% {
+        opacity: 1;
+      }
+
+      50%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    .scenario-title-card {
+      position: fixed;
+      z-index: 5;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px clamp(20px, 7vw, 96px);
+      background: rgba(9, 11, 18, 0.78);
+      color: #fff8ec;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: clamp(15px, 1.7vw, 24px);
+      font-weight: 700;
+      line-height: 1.45;
+      text-align: center;
+      text-shadow:
+        0 0 20px rgba(9, 11, 18, 1),
+        0 0 22px rgba(139, 233, 208, 0.28);
+      opacity: 1;
+      transition:
+        opacity 340ms ease,
+        visibility 340ms ease;
+      pointer-events: none;
+    }
+
+    .scenario-title-card.is-hidden {
+      visibility: hidden;
+      opacity: 0;
+    }
+
     @media (max-width: 760px) {
       body {
-        overflow: auto;
+        overflow: hidden;
       }
 
       .toolbar {
-        position: static;
+        position: fixed;
       }
 
       .status {
         flex-basis: 100%;
         margin-left: 0;
+      }
+
+      .scenario-copy {
+        padding-top: 276px;
+      }
+
+      .scenario-log {
+        max-height: calc(100vh - 276px);
+        overflow: hidden;
+      }
+
+      .scenario-prompt-layer {
+        top: 116px;
+        min-height: 160px;
+        padding: 16px 18px 46px;
+      }
+
+      .scenario-prompt-line {
+        min-height: 96px;
       }
     }

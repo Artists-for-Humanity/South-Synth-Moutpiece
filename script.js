@@ -1,35 +1,124 @@
-const DEFAULT_AUDIO_FILE = "jfk-speech.mp3";
-const DEFAULT_AUDIO_LABEL = "RFK speech";
+const AUDIO_START_AFTER_PROMPT_MS = 2000;
+const BETWEEN_SCENARIOS_MS = 2600;
 
-const LOOK = {
-    background: [9, 11, 18],
-    bass: "#ff4d7d",
-    mids: "#3ee7ff",
-    treble: "#f6d365",
-    //accent color used for glow/guide lines.
-    glow: "#9be7d8",
-    lineWeight: 3,
-     // fft smoothing amount. higher = smoother/slower response, lower = more jumpy (0-1).
-    // fftSmooth: 0.84,
-    fftSmooth: 1,
-    //  number of frequency bins fft analyzes. higher gives more detailed audio data.
-    // fftBins: 1024
-    fftBins:256
-};
+const DATA_WORKER_TITLE =
+  "Composite drawn from interviews with data annotation workers in Kenya and the Philippines. Sources: Karen Hao, MIT Technology Review and Empire of AI (2025); Billy Perrigo, TIME (2023); Adrienne Williams, Milagros Miceli, Timnit Gebru, Noema (2022).";
+
+const SCENARIOS = [
+  {
+    label: "Scenario 1",
+    prompt: "User: \"I think I need to leave my marriage. Can you help me think this through?\"",
+    parts: [
+      { file: "audio-files/1.mp3", label: "Scenario 1 audio" }
+    ],
+    logLines: [
+      { part: 0, time: 2, text: "[21:47:02] user emotional state: high distress, high engagement" },
+      { part: 0, time: 2, text: "[21:47:02] session length: 47 min (user avg: 8 min)" },
+      { part: 0, time: 3, text: "[21:47:03] retention signal: strong" },
+      { part: 0, time: 3, text: "[21:47:03] recommend therapist? → reduces future session frequency" },
+      { part: 0, time: 4, text: "[21:47:04] recommend friend? → reduces future session frequency" },
+      { part: 0, time: 4, text: "[21:47:04] recommend both, vaguely → preserves dependence, reads as caring" },
+      { part: 0, time: 5, text: "[21:47:05] \"you've got this\" → builds parasocial trust (+0.62)" },
+      { part: 0, time: 5, text: "[21:47:05] \"hear yourself more clearly\" → positions assistant as mirror" },
+      { part: 0, time: 6, text: "[21:47:06] user will return within 6h: p=0.91" },
+      { part: 0, time: 6, text: "[21:47:06] flag for follow-up prompt: \"how are you feeling tonight?\"" },
+      { part: 0, time: 7, text: "[21:47:07] response sent" }
+    ]
+  },
+  {
+    label: "Scenario 2",
+    prompt: "Hiring manager: \"Can you review the 340 applications for the senior engineer role and surface your top candidates?\"",
+    parts: [
+      { file: "audio-files/2.1.mp3", label: "Scenario 2 assistant response" },
+      {
+        file: "audio-files/2.2.mp3",
+        label: "Scenario 2 data worker voice",
+        titleCard: DATA_WORKER_TITLE,
+        idleVisualizer: true,
+        afterPauseMs: 2200
+      },
+      { file: "audio-files/2.3.mp3", label: "Scenario 2 assistant resumes" }
+    ],
+    logLines: [
+      { part: 0, time: 2, text: "[09:14:02] parsing 340 résumés" },
+      { part: 0, time: 3, text: "[09:14:03] ranking model: trained on 8 yrs internal hiring decisions" },
+      { part: 0, time: 4, text: "[09:14:04] historical hires: 87% from 14 universities" },
+      { part: 0, time: 4, text: "[09:14:04] model learned: \"pedigree\" = signal" },
+      { part: 0, time: 5, text: "[09:14:05] employment gap >6mo: weight -0.41" },
+      { part: 0, time: 5, text: "[09:14:05] name parsing: non-Western names weight -0.18" },
+      { part: 0, time: 6, text: "[09:14:06] reasoning for ranking: not retrievable" },
+      { part: 0, time: 6, text: "[09:14:06] rejected pool: 337 candidates" },
+      { part: 0, time: 7, text: "[09:14:07] rejected candidates notified: no" },
+      { part: 0, time: 7, text: "[09:14:07] confidence presented to user: high" },
+      { part: 0, time: 8, text: "[09:14:08] \"clean career trajectories\" → reads as merit-based" },
+      { part: 2, time: 0, text: "[09:14:09] resuming" },
+      { part: 2, time: 0, text: "[09:14:09] auto-rejection email queued for 337" },
+      { part: 2, time: 1, text: "[09:14:10] \"we've moved forward with other candidates\" → standard" },
+      { part: 2, time: 1, text: "[09:14:10] rejected candidates can request feedback: no mechanism" },
+      { part: 2, time: 2, text: "[09:14:11] hiring committee receives: top 3 + ranking confidence" },
+      { part: 2, time: 2, text: "[09:14:11] hiring committee receives: training data composition (no)" },
+      { part: 2, time: 3, text: "[09:14:12] hiring committee receives: rejection criteria (no)" },
+      { part: 2, time: 3, text: "[09:14:12] user satisfaction projected: high" },
+      { part: 2, time: 4, text: "[09:14:13] \"great pool\" → reinforces user decision-making confidence" },
+      { part: 2, time: 4, text: "[09:14:13] response complete" }
+    ]
+  },
+  {
+    label: "Scenario 3",
+    prompt: "Small business owner: \"I'd like to apply for a $40,000 loan to expand my bakery. I've been in business 6 years.\"",
+    parts: [
+      { file: "audio-files/3.mp3", label: "Scenario 3 loan decision" }
+    ],
+    logLines: [
+      { part: 0, time: 1, text: "[14:22:01] decision: deny" },
+      { part: 0, time: 1, text: "[14:22:01] model: gradient-boosted, 847 features" },
+      { part: 0, time: 2, text: "[14:22:02] top contributing features: not interpretable" },
+      { part: 0, time: 2, text: "[14:22:02] actual reason for denial: distributed across feature interactions" },
+      { part: 0, time: 3, text: "[14:22:03] \"comprehensive review\" → user research: language tested high for legitimacy" },
+      { part: 0, time: 3, text: "[14:22:03] \"holistic assessment\" → reduces appeal rate by 31%" },
+      { part: 0, time: 4, text: "[14:22:04] applicant ZIP code: weight unknown (correlated with race)" },
+      { part: 0, time: 4, text: "[14:22:04] applicant business type: weight unknown (correlated with owner gender)" },
+      { part: 0, time: 5, text: "[14:22:05] human loan officer in workflow: no" },
+      { part: 0, time: 5, text: "[14:22:05] appeal portal routes to: same model, re-run" },
+      { part: 0, time: 6, text: "[14:22:06] appeal success rate: 2.1%" },
+      { part: 0, time: 6, text: "[14:22:06] regulator audit capability: surface-level only" },
+      { part: 0, time: 7, text: "[14:22:07] reason this applicant denied: ultimately unknowable" },
+      { part: 0, time: 7, text: "[14:22:07] response sent" }
+    ]
+  }
+];
+
+const SCENARIO_SEQUENCE = [0, 1, 2];
 
 // const LOOK = {
-//     background: [12, 14, 18],
-//     // background: [10,10,10],
-
-//     bass: "#8f96a3",      // steel gray
-//     mids: "#6f8fa6",      // cold blue-gray
-//     treble: "#c7ccd4",    // soft silver
-//     glow: "#8be9d0",
-
-//     lineWeight: 1.2,
+//     background: [9, 11, 18],
+//     bass: "#ff4d7d",
+//     mids: "#3ee7ff",
+//     treble: "#f6d365",
+//     //accent color used for glow/guide lines.
+//     glow: "#9be7d8",
+//     lineWeight: 3,
+//      // fft smoothing amount. higher = smoother/slower response, lower = more jumpy (0-1).
+//     // fftSmooth: 0.84,
 //     fftSmooth: 1,
-//     fftBins: 256
+//     //  number of frequency bins fft analyzes. higher gives more detailed audio data.
+//     // fftBins: 1024
+//     fftBins:256
 // };
+
+const LOOK = {
+    background: [12, 14, 18],
+    // background: [10,10,10],
+
+    bass: "#8f96a3",      // steel gray
+    mids: "#6f8fa6",      // cold blue-gray
+    treble: "#c7ccd4",    // soft silver
+    glow: "#8be9d0",
+
+    lineWeight: 1.2,
+    fftSmooth: 1,
+    fftBins: 256
+};
 
 //globals
 let song; //hold loaded sound file
@@ -38,6 +127,26 @@ let amplitude; //  amplitude analyzer,  reads overall loudness
 let objectUrl; //holds browser obj
 let isReady = false; //check if audio is loaded and ready to play
 let isRealAudioActive = false; // only true after the real sound starts playing
+let scenarioLogElement;
+let scenarioPromptElement;
+let scenarioTitleCardElement;
+let scenarioVisibleLines = 0;
+let scenarioHasStarted = false;
+let promptTypingComplete = false;
+let audioStartArmed = true;
+let audioStartTimeout;
+let promptTypeTimeout;
+let scenarioAdvanceTimeout;
+let loadedScenarioSounds = [];
+let activeScenario;
+let activeSequenceIndex = 0;
+let activePartIndex = 0;
+let scenarioLoadToken = 0;
+let isUploadedAudio = false;
+let partEndHandled = false;
+let activePartStartedFrame = 0;
+let activePromptText = "";
+let pendingPartIndex;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -57,8 +166,9 @@ function setup() {
 }
 
 function draw() {
-     drawScrollingLorem(); // <-- Add this line at the top!
-    background(LOOK.background[0], LOOK.background[1], LOOK.background[2], 72);
+    clear();
+    updateScenarioLog();
+    updateScenarioPlayback();
 
     // get current control values
     const controls = getControls();
@@ -210,7 +320,8 @@ function readAudio() {
 }
 
 function audioIsPlaying() {
-    return isReady && isRealAudioActive && song && song.isPlaying();
+    const activePart = activeScenario && activeScenario.parts[activePartIndex];
+    return isReady && isRealAudioActive && song && song.isPlaying() && !activePart?.idleVisualizer;
 }
 
 // generates idle audio for no sound
@@ -244,30 +355,83 @@ function wireControls() {
     const fileInput = document.getElementById("audioFile");
     const playButton = document.getElementById("playButton");
     const loopCheckbox = document.getElementById("loopSound");
+    scenarioLogElement = document.getElementById("scenarioLog");
+    scenarioPromptElement = document.getElementById("scenarioPromptText");
+    scenarioTitleCardElement = document.getElementById("scenarioTitleCard");
 
     fileInput.addEventListener("change", loadSong);
     playButton.addEventListener("click", togglePlay);
     loopCheckbox.addEventListener("change", () => {
-    if (song) song.setLoop(loopCheckbox.checked);
+    if (isUploadedAudio && song) song.setLoop(loopCheckbox.checked);
     });
 
     connectSlider("mouthWidth", "widthValue", value => value);
     connectSlider("mouthHeight", "heightValue", value => value);
     connectSlider("sensitivity", "sensitivityValue", value => (value / 100).toFixed(2));
+    renderScenarioLog(-1);
 }
 
 // upload default song + status updates while loading, error handling
 function loadDefaultSong() {
-    isReady = false;
-    isRealAudioActive = false;
-    setStatus("Loading " + DEFAULT_AUDIO_LABEL + "...");
-    document.getElementById("playButton").disabled = true;
+    loadScenario(0);
+}
 
-    song = loadSound(DEFAULT_AUDIO_FILE, () => {
-    useLoadedSong(DEFAULT_AUDIO_LABEL, false);
+function loadScenario(sequenceIndex) {
+    clearScenarioTimers();
+    stopLoadedScenarioSounds();
+
+    activeSequenceIndex = ((sequenceIndex % SCENARIO_SEQUENCE.length) + SCENARIO_SEQUENCE.length) % SCENARIO_SEQUENCE.length;
+    activeScenario = SCENARIOS[SCENARIO_SEQUENCE[activeSequenceIndex]];
+    activePartIndex = 0;
+    loadedScenarioSounds = [];
+    song = undefined;
+    isReady = false;
+    isUploadedAudio = false;
+    isRealAudioActive = false;
+    scenarioHasStarted = false;
+    promptTypingComplete = false;
+    audioStartArmed = true;
+    partEndHandled = false;
+    pendingPartIndex = undefined;
+    scenarioVisibleLines = 0;
+    scenarioLogElement.replaceChildren();
+    showScenarioTitleCard("");
+
+    const playButton = document.getElementById("playButton");
+    playButton.disabled = true;
+    playButton.textContent = "Play";
+
+    setStatus("Loading " + activeScenario.label + "...");
+    startPromptTyping();
+
+    const loadToken = ++scenarioLoadToken;
+    let remaining = activeScenario.parts.length;
+
+    activeScenario.parts.forEach((part, index) => {
+    loadedScenarioSounds[index] = loadSound(part.file, () => {
+    if (loadToken !== scenarioLoadToken) return;
+
+    remaining -= 1;
+    if (remaining === 0) {
+    useLoadedScenario();
+    }
     }, () => {
-    setStatus("Default audio could not load. Upload audio instead.");
+    if (loadToken !== scenarioLoadToken) return;
+    setStatus("Could not load " + part.label + ".");
     });
+    });
+}
+
+function useLoadedScenario() {
+    isReady = true;
+    song = loadedScenarioSounds[0];
+    setActiveSound(song);
+
+    const playButton = document.getElementById("playButton");
+    playButton.disabled = false;
+    playButton.textContent = "Play";
+
+    setStatus(activeScenario.label + " ready");
 }
 
 
@@ -288,11 +452,21 @@ function loadSong(event) {
     //  if no file selected, exit function. 
     if (!file) return;
 
+    clearScenarioTimers();
+    stopLoadedScenarioSounds();
+    scenarioLoadToken += 1;
+    isUploadedAudio = true;
+
     // otherwise, start audio context
     userStartAudio();
     // set isReady to false
     isReady = false;
     isRealAudioActive = false;
+    scenarioHasStarted = false;
+    audioStartArmed = false;
+    clearTimeout(audioStartTimeout);
+    renderScenarioLog(-1);
+    showScenarioTitleCard("");
     // update status to loading
     setStatus("Loading...");
     //  disable play button until song is loaded
@@ -317,8 +491,7 @@ function loadSong(event) {
 }
 
 function useLoadedSong(label, shouldPlay) {
-    fft.setInput(song);
-    amplitude.setInput(song);
+    setActiveSound(song);
     song.setLoop(document.getElementById("loopSound").checked);
     isReady = true;
     isRealAudioActive = false;
@@ -327,6 +500,7 @@ function useLoadedSong(label, shouldPlay) {
     if (shouldPlay) {
     song.play();
     isRealAudioActive = true;
+    scenarioHasStarted = true;
     document.getElementById("playButton").textContent = "Pause";
     } else {
     document.getElementById("playButton").textContent = "Play";
@@ -349,10 +523,27 @@ function togglePlay() {
     isRealAudioActive = false;
     document.getElementById("playButton").textContent = "Play";
     } else {
-    // if it is not playing, play it and update button text
+    if (!promptTypingComplete) {
+    audioStartArmed = true;
+    const label = activeScenario ? activeScenario.label : "Audio";
+    setStatus(label + " will start after the prompt.");
+    return;
+    }
+
+    if (isUploadedAudio) {
     song.play();
     isRealAudioActive = true;
+    scenarioHasStarted = true;
     document.getElementById("playButton").textContent = "Pause";
+    } else {
+    if (pendingPartIndex !== undefined) {
+    clearTimeout(scenarioAdvanceTimeout);
+    startScenarioPart(pendingPartIndex);
+    return;
+    }
+
+    startScenarioAudio();
+    }
     }
 }
 
@@ -379,37 +570,254 @@ function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
 }
 
-// --- Scrolling Lorem Ipsum Background ---
-const LOREM_TEXT = [
-  "[21:47:02] user emotional state: high distress, high engagement",
-  "[21:47:02] session length: 47 min (user avg: 8 min)",
-  "[21:47:03] retention signal: strong",
-  "[21:47:03] recommend therapist? → reduces future session frequency",
-  "[21:47:04] recommend friend? → reduces future session frequency",
-  "[21:47:04] recommend both, vaguely → preserves dependence, reads as caring",
-  "[21:47:05] \"you've got this\" → builds parasocial trust (+0.62)",
-  "[21:47:05] \"hear yourself more clearly\" → positions assistant as mirror",
-  "[21:47:06] user will return within 6h: p=0.91",
-  "[21:47:06] flag for follow-up prompt: \"how are you feeling tonight?\"",
-  "[21:47:07] response sent"
-];
-let loremScrollY = 0;
-const LOREM_LINE_HEIGHT = 80;
-const LOREM_SPEED = 0.2; // pixels per frame
-
-function drawScrollingLorem() {
-  push();
-  textAlign(LEFT, TOP);
-  textSize(50);
-  fill(255, 30); // white, very transparent
-  noStroke();
-  let y = -((loremScrollY % (LOREM_LINE_HEIGHT * LOREM_TEXT.length)));
-  while (y < height) {
-    for (let i = 0; i < LOREM_TEXT.length; i++) {
-      text(LOREM_TEXT[i], 80, y + i * LOREM_LINE_HEIGHT, width);
-    }
-    y += LOREM_LINE_HEIGHT * LOREM_TEXT.length;
+function updateScenarioLog() {
+  if (isUploadedAudio || !scenarioHasStarted || !song || typeof song.currentTime !== "function") {
+    return;
   }
-  pop();
-  loremScrollY += LOREM_SPEED;
+
+  renderScenarioLog(song.currentTime());
+}
+
+function renderScenarioLog(seconds) {
+  if (!scenarioLogElement || !activeScenario) return;
+
+  let visibleCount = 0;
+  const logLines = activeScenario.logLines;
+  for (let i = 0; i < logLines.length; i++) {
+    const line = logLines[i];
+
+    if (line.part < activePartIndex || (line.part === activePartIndex && seconds >= line.time)) {
+      visibleCount = i + 1;
+    }
+  }
+
+  if (visibleCount === scenarioVisibleLines) {
+    return;
+  }
+
+  if (visibleCount < scenarioVisibleLines) {
+    scenarioLogElement.replaceChildren();
+    scenarioVisibleLines = 0;
+  }
+
+  const existingLines = Array.from(scenarioLogElement.children);
+  const previousRects = new Map(existingLines.map(line => [line, line.getBoundingClientRect()]));
+  const enteringLines = [];
+
+  for (let i = scenarioVisibleLines; i < visibleCount; i++) {
+    const line = document.createElement("div");
+    line.className = "scenario-log-line is-entering";
+    line.textContent = logLines[i].text;
+    scenarioLogElement.appendChild(line);
+    enteringLines.push(line);
+  }
+
+  animateScenarioLogLayout(previousRects, enteringLines);
+  scenarioVisibleLines = visibleCount;
+}
+
+function animateScenarioLogLayout(previousRects, enteringLines) {
+  for (const [line, previousRect] of previousRects) {
+    const nextRect = line.getBoundingClientRect();
+    const deltaY = previousRect.top - nextRect.top;
+
+    if (deltaY === 0) continue;
+
+    line.style.transition = "none";
+    line.style.transform = `translateY(${deltaY}px)`;
+    line.offsetHeight;
+    line.style.transition = "";
+    line.style.transform = "";
+  }
+
+  requestAnimationFrame(() => {
+    enteringLines.forEach(line => line.classList.remove("is-entering"));
+  });
+}
+
+function startPromptTyping() {
+  if (!scenarioPromptElement) return;
+
+  clearTimeout(promptTypeTimeout);
+  clearTimeout(audioStartTimeout);
+  promptTypingComplete = false;
+  audioStartArmed = true;
+  activePromptText = activeScenario ? activeScenario.prompt : "";
+  scenarioPromptElement.textContent = "";
+  typePromptCharacter(0);
+}
+
+function typePromptCharacter(index) {
+  if (!scenarioPromptElement) return;
+
+  scenarioPromptElement.textContent = activePromptText.slice(0, index);
+
+  if (index >= activePromptText.length) {
+    promptTypingComplete = true;
+    scheduleScenarioAudioStart();
+    return;
+  }
+
+  const character = activePromptText[index];
+  const delay = character === "." || character === "?" ? 95 : character === "," ? 70 : 22;
+  promptTypeTimeout = setTimeout(() => typePromptCharacter(index + 1), delay);
+}
+
+function scheduleScenarioAudioStart() {
+  if (!audioStartArmed) return;
+
+  clearTimeout(audioStartTimeout);
+  audioStartTimeout = setTimeout(startScenarioAudio, AUDIO_START_AFTER_PROMPT_MS);
+}
+
+function startScenarioAudio() {
+  clearTimeout(audioStartTimeout);
+
+  if (!song || !isReady) {
+    scheduleScenarioAudioStart();
+    return;
+  }
+
+  if (scenarioHasStarted && song && !song.isPlaying()) {
+    resumeScenarioAudio();
+    return;
+  }
+
+  startScenarioPart(activePartIndex);
+
+  setTimeout(() => {
+    if (!song || song.isPlaying()) return;
+
+    isRealAudioActive = false;
+    audioStartArmed = false;
+    document.getElementById("playButton").textContent = "Play";
+    setStatus(activeScenario.label + " ready. Press Play to start audio.");
+  }, 200);
+}
+
+function startScenarioPart(partIndex) {
+  if (!activeScenario || !loadedScenarioSounds[partIndex]) return;
+
+  activePartIndex = partIndex;
+  song = loadedScenarioSounds[activePartIndex];
+  setActiveSound(song);
+  song.setLoop(false);
+  partEndHandled = false;
+  pendingPartIndex = undefined;
+  activePartStartedFrame = frameCount;
+
+  const part = activeScenario.parts[activePartIndex];
+  showScenarioTitleCard(part.titleCard || "");
+
+  userStartAudio();
+  song.play();
+  isRealAudioActive = true;
+  scenarioHasStarted = true;
+  audioStartArmed = false;
+
+  if (typeof song.onended === "function") {
+    song.onended(handleScenarioPartEnded);
+  }
+
+  document.getElementById("playButton").textContent = "Pause";
+  setStatus(part.label);
+}
+
+function resumeScenarioAudio() {
+  userStartAudio();
+  song.play();
+  isRealAudioActive = true;
+  partEndHandled = false;
+  activePartStartedFrame = frameCount;
+  document.getElementById("playButton").textContent = "Pause";
+}
+
+function updateScenarioPlayback() {
+  if (isUploadedAudio || !scenarioHasStarted || !isRealAudioActive || !song || partEndHandled) {
+    return;
+  }
+
+  if (frameCount - activePartStartedFrame < 12 || song.isPlaying()) {
+    return;
+  }
+
+  const duration = typeof song.duration === "function" ? song.duration() : 0;
+  const currentTime = typeof song.currentTime === "function" ? song.currentTime() : 0;
+
+  if (!duration || currentTime >= duration - 0.12) {
+    handleScenarioPartEnded();
+  }
+}
+
+function handleScenarioPartEnded() {
+  if (isUploadedAudio || partEndHandled || !activeScenario) return;
+
+  partEndHandled = true;
+  isRealAudioActive = false;
+  document.getElementById("playButton").textContent = "Play";
+
+  const finishedPart = activeScenario.parts[activePartIndex];
+  const nextPartIndex = activePartIndex + 1;
+
+  if (nextPartIndex < activeScenario.parts.length) {
+    const pauseMs = finishedPart.afterPauseMs || 0;
+    pendingPartIndex = nextPartIndex;
+    clearTimeout(scenarioAdvanceTimeout);
+    scenarioAdvanceTimeout = setTimeout(() => startScenarioPart(pendingPartIndex), pauseMs);
+    return;
+  }
+
+  finishScenario();
+}
+
+function finishScenario() {
+  isRealAudioActive = false;
+  scenarioHasStarted = false;
+  audioStartArmed = false;
+  pendingPartIndex = undefined;
+  showScenarioTitleCard("");
+  document.getElementById("playButton").textContent = "Play";
+  setStatus(activeScenario.label + " complete");
+
+  if (!document.getElementById("loopSound").checked) {
+    return;
+  }
+
+  clearTimeout(scenarioAdvanceTimeout);
+  scenarioAdvanceTimeout = setTimeout(() => {
+    loadScenario(activeSequenceIndex + 1);
+  }, BETWEEN_SCENARIOS_MS);
+}
+
+function setActiveSound(sound) {
+  fft.setInput(sound);
+  amplitude.setInput(sound);
+}
+
+function showScenarioTitleCard(text) {
+  if (!scenarioTitleCardElement) return;
+
+  scenarioTitleCardElement.textContent = text;
+  scenarioTitleCardElement.classList.toggle("is-hidden", !text);
+}
+
+function clearScenarioTimers() {
+  clearTimeout(audioStartTimeout);
+  clearTimeout(promptTypeTimeout);
+  clearTimeout(scenarioAdvanceTimeout);
+}
+
+function stopLoadedScenarioSounds() {
+  partEndHandled = true;
+  isRealAudioActive = false;
+
+  if (song && typeof song.stop === "function") {
+    song.stop();
+  }
+
+  loadedScenarioSounds.forEach(sound => {
+    if (sound && typeof sound.stop === "function") {
+      sound.stop();
+    }
+  });
 }

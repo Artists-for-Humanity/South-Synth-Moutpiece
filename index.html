@@ -15,7 +15,7 @@
       Shape
       <select id="shapeMode">
         <option value="circle">Circle</option>
-        <option value="line">Line</option>
+        <option value="line" selected>Line</option>
       </select>
     </label>
 
@@ -42,8 +42,20 @@
       Loop
     </label>
 
-    <span id="status" class="status">Loading RFK speech...</span>
+    <span id="status" class="status">Loading scenario...</span>
   </div>
+
+  <main class="scenario-copy" aria-label="Scenario internal log">
+    <section id="scenarioLog" class="scenario-log" aria-live="polite" aria-label="Internal system log"></section>
+  </main>
+
+  <section class="scenario-prompt-layer" aria-label="User prompt">
+    <div class="scenario-prompt-line">
+      <span id="scenarioPromptText"></span><span class="typing-caret" aria-hidden="true"></span>
+    </div>
+  </section>
+
+  <section id="scenarioTitleCard" class="scenario-title-card is-hidden" aria-live="polite"></section>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>

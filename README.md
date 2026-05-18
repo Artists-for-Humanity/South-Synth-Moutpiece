@@ -3,9 +3,15 @@ A customizable p5.js audio visualizer that turns sound into pulsing circles, wav
 
 ## Use it
 
-Open `index.html` in a browser and press `Play` to hear the default RFK speech. You can still upload your own audio file, and the uploaded file will replace the default sound.
+Open `index.html` in a browser. The app types the scenario prompt, waits two seconds, then starts the configured audio while the internal log reveals in sync. With `Loop` checked, it advances through the configured scenarios.
 
-The default recording is Robert F. Kennedy's April 4, 1968 statement on the assassination of Martin Luther King Jr., loaded from Wikimedia Commons.
+Configured scenarios:
+
+- Scenario 1: `audio-files/1.mp3`
+- Scenario 2: `audio-files/2.1.mp3`, `audio-files/2.2.mp3`, `audio-files/2.3.mp3`
+- Scenario 3: `audio-files/3.mp3`
+
+You can still upload your own audio file, and the uploaded file will replace the scenario sequence.
 
 Controls:
 
