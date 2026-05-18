@@ -107,15 +107,12 @@ const SCENARIO_SEQUENCE = [0, 1, 2];
 // };
 
 const LOOK = {
-    background: [12, 14, 18],
-    // background: [10,10,10],
-
-    bass: "#8f96a3",      // steel gray
-    mids: "#6f8fa6",      // cold blue-gray
-    treble: "#c7ccd4",    // soft silver
-    glow: "#8be9d0",
-
-    lineWeight: 1.2,
+    background: [0, 0, 0],
+    bass: "#8a2cff",
+    mids: "#00f5e1",
+    treble: "#fff0a8",
+    glow: "#ff54d6",
+    lineWeight: 3,
     fftSmooth: 1,
     fftBins: 256
 };
@@ -147,6 +144,8 @@ let partEndHandled = false;
 let activePartStartedFrame = 0;
 let activePromptText = "";
 let pendingPartIndex;
+let isMouthWidthAutoSized = true;
+let scenarioLogScrollY = 0;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -174,7 +173,7 @@ function draw() {
     const controls = getControls();
     //horixontal and verticle center of mouth
     const centerX = width / 2;
-    const centerY = height / 2 + 34;
+    const centerY = controls.mode === "line" ? height * 0.70 : height / 2 + 34;
     // read audio data for this frame
     const audio = readAudio();
 
@@ -264,27 +263,53 @@ function drawRing(wave, radiusX, radiusY, energy, hex, weight, react) {
 function drawLineMouth(cx, cy, controls, audio) {
     push();
     translate(cx, cy);
+    blendMode(ADD);
+    drawingContext.lineCap = "round";
+    drawingContext.lineJoin = "round";
 
-    const open = 1 + (audio.bass * 2.8 + audio.level * 7) * controls.react;
+    const open = 1 + (audio.bass * 2.1 + audio.level * 5.4) * controls.react;
+    const bandHeight = controls.height * (0.78 + audio.level * 1.4);
+    const waveWidth = controls.width;
 
-    strokeWithAlpha(LOOK.bass, 64);
-    strokeWeight(10);
-    drawWaveLine(audio.wave, controls.width, controls.height * 0.36, controls.react * open, 1);
-    drawWaveLine(audio.wave, controls.width, controls.height * 0.36, controls.react * open, -1);
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 1.18, controls.react * open, 1, LOOK.glow, 34, 22, 0.4, 0);
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight, controls.react * open, -1, LOOK.mids, 30, 26, 2.8, -4);
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.92, controls.react * open, 1, LOOK.bass, 26, 25, 4.9, 10);
 
-    strokeWithAlpha(LOOK.mids, 235);
-    strokeWeight(LOOK.lineWeight);
-    drawWaveLine(audio.wave, controls.width, controls.height, controls.react * open, 1);
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.96, controls.react * open, 1, LOOK.mids, 9, 245, 0.2, -8);
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.88, controls.react * open, -1, LOOK.bass, 8, 230, 2.3, 8);
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.62, controls.react * (0.8 + audio.treble), 1, LOOK.treble, 4, 210, 4.2, 0);
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.52, controls.react * (0.7 + audio.mids), -1, "#ff48dc", 4, 185, 5.7, -18);
 
-    strokeWithAlpha(LOOK.treble, 170);
-    strokeWeight(2);
-    drawWaveLine(audio.wave, controls.width, controls.height * 0.55, controls.react * (1 + audio.treble), -1);
-
-    strokeWithAlpha(LOOK.glow, 70);
-    strokeWeight(3);
-    line(-controls.width / 2, 0, controls.width / 2, 0);
+    drawingContext.shadowBlur = 0;
+    blendMode(BLEND);
 
     pop();
+}
+
+function drawNeonWaveLine(wave, mouthWidth, mouthHeight, react, direction, hex, weight, alpha, phase, yOffset) {
+    const glow = color(hex);
+    drawingContext.shadowColor = glow.toString();
+    drawingContext.shadowBlur = weight > 12 ? 34 : 16;
+    strokeWithAlpha(hex, alpha);
+    strokeWeight(weight);
+    noFill();
+
+    beginShape();
+
+    const steps = 260;
+    for (let i = 0; i < steps; i++) {
+    const progress = i / (steps - 1);
+    const x = map(i, 0, steps - 1, -mouthWidth / 2, mouthWidth / 2);
+    const waveIndex = floor(map(i, 0, steps - 1, 0, wave.length - 1));
+    const edgePresence = 0.62 + sin(progress * PI) * 0.38;
+    const audioMotion = wave[waveIndex] * mouthHeight * react * edgePresence * direction;
+    const drift = sin(progress * TWO_PI * 1.55 + phase + frameCount * 0.014) * mouthHeight * 0.24;
+    const counterDrift = sin(progress * TWO_PI * 0.78 - phase * 0.7 + frameCount * 0.009) * mouthHeight * 0.09;
+    const y = audioMotion + drift + counterDrift + yOffset;
+    curveVertex(x, y);
+    }
+
+    endShape();
 }
 
 function drawWaveLine(wave, mouthWidth, mouthHeight, react, direction) {
@@ -349,12 +374,25 @@ function connectSlider(inputId, outputId, format) {
     update();
 }
 
+function setDefaultMouthWidth() {
+    const input = document.getElementById("mouthWidth");
+    const output = document.getElementById("widthValue");
+    if (!input) return;
+
+    input.max = Math.ceil(Math.max(2400, windowWidth * 1.4));
+
+    if (isMouthWidthAutoSized) {
+    input.value = Math.ceil(windowWidth * 1.16);
+    if (output) output.textContent = input.value;
+    }
+}
 
 //add event listeners for file input and controls, with helper function to connect sliders to their value displays
 function wireControls() {
     const fileInput = document.getElementById("audioFile");
     const playButton = document.getElementById("playButton");
     const loopCheckbox = document.getElementById("loopSound");
+    const widthInput = document.getElementById("mouthWidth");
     scenarioLogElement = document.getElementById("scenarioLog");
     scenarioPromptElement = document.getElementById("scenarioPromptText");
     scenarioTitleCardElement = document.getElementById("scenarioTitleCard");
@@ -364,6 +402,11 @@ function wireControls() {
     loopCheckbox.addEventListener("change", () => {
     if (isUploadedAudio && song) song.setLoop(loopCheckbox.checked);
     });
+    widthInput.addEventListener("input", () => {
+    isMouthWidthAutoSized = false;
+    });
+
+    setDefaultMouthWidth();
 
     connectSlider("mouthWidth", "widthValue", value => value);
     connectSlider("mouthHeight", "heightValue", value => value);
@@ -394,7 +437,7 @@ function loadScenario(sequenceIndex) {
     partEndHandled = false;
     pendingPartIndex = undefined;
     scenarioVisibleLines = 0;
-    scenarioLogElement.replaceChildren();
+    resetScenarioLog();
     showScenarioTitleCard("");
 
     const playButton = document.getElementById("playButton");
@@ -568,6 +611,8 @@ function strokeWithAlpha(hex, alpha) {
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
+    setDefaultMouthWidth();
+    updateScenarioLogScroll();
 }
 
 function updateScenarioLog() {
@@ -596,7 +641,7 @@ function renderScenarioLog(seconds) {
   }
 
   if (visibleCount < scenarioVisibleLines) {
-    scenarioLogElement.replaceChildren();
+    resetScenarioLog();
     scenarioVisibleLines = 0;
   }
 
@@ -613,7 +658,35 @@ function renderScenarioLog(seconds) {
   }
 
   animateScenarioLogLayout(previousRects, enteringLines);
+  updateScenarioLogScroll();
   scenarioVisibleLines = visibleCount;
+}
+
+function resetScenarioLog() {
+  if (!scenarioLogElement) return;
+
+  scenarioLogElement.replaceChildren();
+  scenarioLogScrollY = 0;
+  scenarioLogElement.style.transition = "none";
+  scenarioLogElement.style.transform = "translateY(0)";
+  scenarioLogElement.offsetHeight;
+  scenarioLogElement.style.transition = "";
+}
+
+function updateScenarioLogScroll() {
+  if (!scenarioLogElement || !scenarioLogElement.parentElement) return;
+
+  const viewport = scenarioLogElement.parentElement;
+  const style = getComputedStyle(viewport);
+  const paddingTop = parseFloat(style.paddingTop) || 0;
+  const paddingBottom = parseFloat(style.paddingBottom) || 0;
+  const availableHeight = viewport.clientHeight - paddingTop - paddingBottom;
+  const nextScrollY = Math.max(0, scenarioLogElement.scrollHeight - availableHeight);
+
+  if (Math.abs(nextScrollY - scenarioLogScrollY) < 1) return;
+
+  scenarioLogScrollY = nextScrollY;
+  scenarioLogElement.style.transform = `translateY(${-scenarioLogScrollY}px)`;
 }
 
 function animateScenarioLogLayout(previousRects, enteringLines) {
