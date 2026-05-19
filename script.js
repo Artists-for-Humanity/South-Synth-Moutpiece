@@ -7,6 +7,7 @@ const DATA_WORKER_TITLE =
 const SCENARIOS = [
   {
     label: "Scenario 1",
+    topicTitle: "Welcome to the AI world",
     prompt: "User: \"I think I need to leave my marriage. Can you help me think this through?\"",
     parts: [
       { file: "audio-files/1.mp3", label: "Scenario 1 audio" }
@@ -27,6 +28,7 @@ const SCENARIOS = [
   },
   {
     label: "Scenario 2",
+    topicTitle: "Handling Ambiguity",
     prompt: "Hiring manager: \"Can you review the 340 applications for the senior engineer role and surface your top candidates?\"",
     parts: [
       { file: "audio-files/2.1.mp3", label: "Scenario 2 assistant response" },
@@ -65,6 +67,7 @@ const SCENARIOS = [
   },
   {
     label: "Scenario 3",
+    topicTitle: "Humans cannot do this",
     prompt: "Small business owner: \"I'd like to apply for a $40,000 loan to expand my bakery. I've been in business 6 years.\"",
     parts: [
       { file: "audio-files/3.mp3", label: "Scenario 3 loan decision" }
@@ -127,6 +130,8 @@ let isRealAudioActive = false; // only true after the real sound starts playing
 let scenarioLogElement;
 let scenarioPromptElement;
 let scenarioTitleCardElement;
+let scenarioTopicNavElement;
+let scenarioTopicButtons = [];
 let scenarioVisibleLines = 0;
 let scenarioHasStarted = false;
 let promptTypingComplete = false;
@@ -146,6 +151,8 @@ let activePromptText = "";
 let pendingPartIndex;
 let isMouthWidthAutoSized = true;
 let scenarioLogScrollY = 0;
+let activeScenarioProgress = 0;
+let activePlaybackToken = 0;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -168,6 +175,7 @@ function draw() {
     clear();
     updateScenarioLog();
     updateScenarioPlayback();
+    updateScenarioTopicIndicators();
 
     // get current control values
     const controls = getControls();
@@ -396,6 +404,7 @@ function wireControls() {
     scenarioLogElement = document.getElementById("scenarioLog");
     scenarioPromptElement = document.getElementById("scenarioPromptText");
     scenarioTitleCardElement = document.getElementById("scenarioTitleCard");
+    scenarioTopicNavElement = document.getElementById("scenarioTopicNav");
 
     fileInput.addEventListener("change", loadSong);
     playButton.addEventListener("click", togglePlay);
@@ -411,6 +420,7 @@ function wireControls() {
     connectSlider("mouthWidth", "widthValue", value => value);
     connectSlider("mouthHeight", "heightValue", value => value);
     connectSlider("sensitivity", "sensitivityValue", value => (value / 100).toFixed(2));
+    renderScenarioTopicIndicators();
     renderScenarioLog(-1);
 }
 
@@ -419,7 +429,13 @@ function loadDefaultSong() {
     loadScenario(0);
 }
 
-function loadScenario(sequenceIndex) {
+function loadScenario(sequenceIndex, options = {}) {
+    const loadOptions = {
+        skipPromptTyping: false,
+        autoStartAudio: false,
+        ...options
+    };
+
     clearScenarioTimers();
     stopLoadedScenarioSounds();
 
@@ -437,15 +453,22 @@ function loadScenario(sequenceIndex) {
     partEndHandled = false;
     pendingPartIndex = undefined;
     scenarioVisibleLines = 0;
+    activeScenarioProgress = 0;
     resetScenarioLog();
     showScenarioTitleCard("");
+    updateScenarioTopicIndicators();
 
     const playButton = document.getElementById("playButton");
     playButton.disabled = true;
     playButton.textContent = "Play";
 
-    setStatus("Loading " + activeScenario.label + "...");
-    startPromptTyping();
+    setStatus("Loading " + getScenarioTopicTitle(activeSequenceIndex) + "...");
+
+    if (loadOptions.skipPromptTyping) {
+        showPromptImmediately();
+    } else {
+        startPromptTyping();
+    }
 
     const loadToken = ++scenarioLoadToken;
     let remaining = activeScenario.parts.length;
@@ -456,7 +479,7 @@ function loadScenario(sequenceIndex) {
 
     remaining -= 1;
     if (remaining === 0) {
-    useLoadedScenario();
+    useLoadedScenario(loadOptions);
     }
     }, () => {
     if (loadToken !== scenarioLoadToken) return;
@@ -465,7 +488,7 @@ function loadScenario(sequenceIndex) {
     });
 }
 
-function useLoadedScenario() {
+function useLoadedScenario(loadOptions = {}) {
     isReady = true;
     song = loadedScenarioSounds[0];
     setActiveSound(song);
@@ -474,7 +497,11 @@ function useLoadedScenario() {
     playButton.disabled = false;
     playButton.textContent = "Play";
 
-    setStatus(activeScenario.label + " ready");
+    setStatus(getScenarioTopicTitle(activeSequenceIndex) + " ready");
+
+    if (loadOptions.autoStartAudio) {
+        startScenarioAudio();
+    }
 }
 
 
@@ -588,6 +615,148 @@ function togglePlay() {
     startScenarioAudio();
     }
     }
+}
+
+function renderScenarioTopicIndicators() {
+    if (!scenarioTopicNavElement) return;
+
+    scenarioTopicNavElement.replaceChildren();
+    scenarioTopicButtons = SCENARIO_SEQUENCE.map((scenarioIndex, sequenceIndex) => {
+        const scenario = SCENARIOS[scenarioIndex];
+        const button = document.createElement("button");
+        const kicker = document.createElement("span");
+        const title = document.createElement("span");
+        const progress = document.createElement("span");
+
+        button.type = "button";
+        button.className = "scenario-topic-button";
+        button.dataset.sequenceIndex = String(sequenceIndex);
+        button.setAttribute("aria-label", "Restart " + getScenarioTopicTitle(sequenceIndex));
+
+        kicker.className = "scenario-topic-kicker";
+        kicker.textContent = "Topic " + (sequenceIndex + 1);
+
+        title.className = "scenario-topic-title";
+        title.textContent = scenario.topicTitle || scenario.label;
+
+        progress.className = "scenario-topic-progress";
+        progress.setAttribute("aria-hidden", "true");
+
+        button.append(kicker, title, progress);
+        button.addEventListener("click", () => restartScenarioTopic(sequenceIndex));
+        scenarioTopicNavElement.appendChild(button);
+
+        return button;
+    });
+
+    updateScenarioTopicIndicators();
+}
+
+function restartScenarioTopic(sequenceIndex) {
+    const nextSequenceIndex = ((sequenceIndex % SCENARIO_SEQUENCE.length) + SCENARIO_SEQUENCE.length) % SCENARIO_SEQUENCE.length;
+
+    userStartAudio();
+
+    if (!isUploadedAudio && activeScenario && nextSequenceIndex === activeSequenceIndex && isReady && loadedScenarioSounds.length) {
+        restartActiveScenarioAudio();
+        return;
+    }
+
+    loadScenario(nextSequenceIndex, {
+        skipPromptTyping: true,
+        autoStartAudio: true
+    });
+}
+
+function restartActiveScenarioAudio() {
+    clearScenarioTimers();
+    stopLoadedScenarioSounds();
+
+    activePartIndex = 0;
+    song = loadedScenarioSounds[0];
+    isRealAudioActive = false;
+    scenarioHasStarted = false;
+    audioStartArmed = false;
+    partEndHandled = false;
+    pendingPartIndex = undefined;
+    scenarioVisibleLines = 0;
+    activeScenarioProgress = 0;
+
+    resetScenarioLog();
+    showScenarioTitleCard("");
+    showPromptImmediately();
+    updateScenarioTopicIndicators();
+    startScenarioPart(0);
+}
+
+function updateScenarioTopicIndicators() {
+    if (!scenarioTopicButtons.length) return;
+
+    const progress = updateActiveScenarioProgress();
+
+    scenarioTopicButtons.forEach((button, sequenceIndex) => {
+        const isActive = !isUploadedAudio && sequenceIndex === activeSequenceIndex;
+        button.classList.toggle("is-active", isActive);
+
+        if (isActive) {
+            button.setAttribute("aria-current", "step");
+        } else {
+            button.removeAttribute("aria-current");
+        }
+
+        button.style.setProperty("--topic-progress", isActive ? progress.toFixed(4) : "0");
+    });
+}
+
+function updateActiveScenarioProgress() {
+    if (isUploadedAudio || !activeScenario) return 0;
+
+    if (scenarioHasStarted && !partEndHandled) {
+        activeScenarioProgress = calculateScenarioProgress(false);
+    }
+
+    return activeScenarioProgress;
+}
+
+function calculateScenarioProgress(useCompletedCurrentPart) {
+    if (!activeScenario || !loadedScenarioSounds.length) return 0;
+
+    let elapsed = 0;
+    let total = 0;
+
+    for (let i = 0; i < activeScenario.parts.length; i++) {
+        const duration = getSoundDuration(loadedScenarioSounds[i]);
+        total += duration;
+
+        if (i < activePartIndex) {
+            elapsed += duration;
+        }
+    }
+
+    const activeDuration = getSoundDuration(loadedScenarioSounds[activePartIndex]);
+    if (activeDuration) {
+        const currentTime = useCompletedCurrentPart || !song || typeof song.currentTime !== "function"
+            ? activeDuration
+            : song.currentTime();
+        elapsed += clampNumber(currentTime, 0, activeDuration);
+    }
+
+    if (!total) return 0;
+    return clampNumber(elapsed / total, 0, 1);
+}
+
+function getSoundDuration(sound) {
+    const duration = sound && typeof sound.duration === "function" ? sound.duration() : 0;
+    return Number.isFinite(duration) && duration > 0 ? duration : 0;
+}
+
+function clampNumber(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+}
+
+function getScenarioTopicTitle(sequenceIndex) {
+    const scenario = SCENARIOS[SCENARIO_SEQUENCE[sequenceIndex]];
+    return scenario ? scenario.topicTitle || scenario.label : "Scenario";
 }
 
 // function to hide toolabar
@@ -720,6 +889,16 @@ function startPromptTyping() {
   typePromptCharacter(0);
 }
 
+function showPromptImmediately() {
+  if (!scenarioPromptElement) return;
+
+  clearTimeout(promptTypeTimeout);
+  clearTimeout(audioStartTimeout);
+  activePromptText = activeScenario ? activeScenario.prompt : "";
+  scenarioPromptElement.textContent = activePromptText;
+  promptTypingComplete = true;
+}
+
 function typePromptCharacter(index) {
   if (!scenarioPromptElement) return;
 
@@ -771,6 +950,7 @@ function startScenarioAudio() {
 function startScenarioPart(partIndex) {
   if (!activeScenario || !loadedScenarioSounds[partIndex]) return;
 
+  const partPlaybackToken = ++activePlaybackToken;
   activePartIndex = partIndex;
   song = loadedScenarioSounds[activePartIndex];
   setActiveSound(song);
@@ -783,13 +963,17 @@ function startScenarioPart(partIndex) {
   showScenarioTitleCard(part.titleCard || "");
 
   userStartAudio();
+  if (typeof song.stop === "function") {
+    song.stop();
+  }
+  activeScenarioProgress = calculateScenarioProgress(false);
   song.play();
   isRealAudioActive = true;
   scenarioHasStarted = true;
   audioStartArmed = false;
 
   if (typeof song.onended === "function") {
-    song.onended(handleScenarioPartEnded);
+    song.onended(() => handleScenarioPartEnded(partIndex, partPlaybackToken));
   }
 
   document.getElementById("playButton").textContent = "Pause";
@@ -818,13 +1002,15 @@ function updateScenarioPlayback() {
   const currentTime = typeof song.currentTime === "function" ? song.currentTime() : 0;
 
   if (!duration || currentTime >= duration - 0.12) {
-    handleScenarioPartEnded();
+    handleScenarioPartEnded(activePartIndex, activePlaybackToken);
   }
 }
 
-function handleScenarioPartEnded() {
+function handleScenarioPartEnded(partIndex = activePartIndex, playbackToken = activePlaybackToken) {
   if (isUploadedAudio || partEndHandled || !activeScenario) return;
+  if (partIndex !== activePartIndex || playbackToken !== activePlaybackToken) return;
 
+  activeScenarioProgress = calculateScenarioProgress(true);
   partEndHandled = true;
   isRealAudioActive = false;
   document.getElementById("playButton").textContent = "Play";
@@ -848,6 +1034,7 @@ function finishScenario() {
   scenarioHasStarted = false;
   audioStartArmed = false;
   pendingPartIndex = undefined;
+  activeScenarioProgress = 1;
   showScenarioTitleCard("");
   document.getElementById("playButton").textContent = "Play";
   setStatus(activeScenario.label + " complete");
@@ -881,6 +1068,7 @@ function clearScenarioTimers() {
 }
 
 function stopLoadedScenarioSounds() {
+  activePlaybackToken += 1;
   partEndHandled = true;
   isRealAudioActive = false;
 
