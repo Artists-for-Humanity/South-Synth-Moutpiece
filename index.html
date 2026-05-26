@@ -6,7 +6,7 @@
   <title>South Synth Mouthpiece</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@700&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=IBM+Plex+Sans+Condensed:wght@600&family=Roboto+Mono:wght@500&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -55,12 +55,30 @@
   <nav id="scenarioTopicNav" class="scenario-topic-nav" aria-label="Scenario topics"></nav>
 
   <section class="scenario-prompt-layer" aria-label="User prompt">
-    <div class="scenario-prompt-line">
-      <span id="scenarioPromptText"></span><span class="typing-caret" aria-hidden="true"></span>
+    <div class="speech-bubble">
+      <div class="scenario-prompt-line">
+        <span id="scenarioPromptText"></span><span class="typing-caret" aria-hidden="true"></span>
+      </div>
     </div>
   </section>
 
   <section id="scenarioTitleCard" class="scenario-title-card is-hidden" aria-live="polite"></section>
+
+  <!-- Scenario selection screen (state 2 of 3) -->
+  <div id="scenarioSelectScreen" class="scenario-select-screen is-hidden">
+    <h1 class="scenario-select-heading">What should AI decide for you today?</h1>
+    <div class="scenario-select-options">
+      <button class="scenario-option-btn" type="button" data-scenario-key="marriage">
+        <span class="scenario-option-label">A&nbsp;&nbsp;:&nbsp;&nbsp;Marriage Advice</span>
+      </button>
+      <button class="scenario-option-btn" type="button" data-scenario-key="hiring">
+        <span class="scenario-option-label">B&nbsp;&nbsp;:&nbsp;&nbsp;Hiring Screening</span>
+      </button>
+      <button class="scenario-option-btn" type="button" data-scenario-key="loan">
+        <span class="scenario-option-label">C&nbsp;&nbsp;:&nbsp;&nbsp;Loan Approval</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Home / attract screen -->
   <div id="homeScreen" class="home-screen">

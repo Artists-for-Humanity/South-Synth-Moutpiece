@@ -98,6 +98,21 @@ const SCENARIOS = [
 
 const SCENARIO_SEQUENCE = [0, 1, 2];
 
+// Maps scenario-select keys → SCENARIO_SEQUENCE index.
+// Update this object when scenario content changes.
+const SCENARIO_KEY_MAP = {
+    marriage: 0,
+    hiring:   1,
+    loan:     2,
+};
+
+// Nav bar display labels — index mirrors SCENARIO_SEQUENCE order.
+const SCENARIO_NAV_LABELS = [
+    { letter: "A", name: "Marriage Advice" },
+    { letter: "B", name: "Hiring Screening" },
+    { letter: "C", name: "Loan Approval" },
+];
+
 // const LOOK = {
 //     background: [9, 11, 18],
 //     bass: "#ff4d7d",
@@ -159,8 +174,10 @@ let scenarioLogScrollY = 0;
 let activeScenarioProgress = 0;
 let activePlaybackToken = 0;
 
-// Home screen / idle state
-let homeScreenVisible = true;
+// Screen state: "home" | "select" | "visualizer"
+let currentScreen = "home";
+// Key of the scenario the visitor chose (marriage | hiring | loan)
+let currentScenarioKey = null;
 let idleTimerId = null;
 
 function setup() {
@@ -187,7 +204,8 @@ function draw() {
     const controls = getControls();
     //horixontal and verticle center of mouth
     const centerX = width / 2;
-    const centerY = controls.mode === "line" ? height * 0.70 : height / 2 + 34;
+    // Line mode: zone 2 centre (216–378 px band, mid = 297 = height * 0.275)
+    const centerY = controls.mode === "line" ? height * 0.275 : height / 2 + 34;
     // read audio data for this frame
     const audio = readAudio();
 
@@ -277,6 +295,8 @@ function drawRing(wave, radiusX, radiusY, energy, hex, weight, react) {
 function drawLineMouth(cx, cy, controls, audio) {
     push();
     translate(cx, cy);
+    // ADD blend: where lines cross they brighten toward white, emphasising the
+    // crossing-wave effect on the black background.
     blendMode(ADD);
     drawingContext.lineCap = "round";
     drawingContext.lineJoin = "round";
@@ -285,18 +305,13 @@ function drawLineMouth(cx, cy, controls, audio) {
     const bandHeight = controls.height * (0.78 + audio.level * 1.4);
     const waveWidth = controls.width;
 
-    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 1.18, controls.react * open, 1, LOOK.glow, 34, 22, 0.4, 0);
-    drawNeonWaveLine(audio.wave, waveWidth, bandHeight, controls.react * open, -1, LOOK.mids, 30, 26, 2.8, -4);
-    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.92, controls.react * open, 1, LOOK.bass, 26, 25, 4.9, 10);
-
-    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.96, controls.react * open, 1, LOOK.mids, 9, 245, 0.2, -8);
-    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.88, controls.react * open, -1, LOOK.bass, 8, 230, 2.3, 8);
-    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.62, controls.react * (0.8 + audio.treble), 1, LOOK.treble, 4, 210, 4.2, 0);
-    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.52, controls.react * (0.7 + audio.mids), -1, "#ff48dc", 4, 185, 5.7, -18);
+    // Two crossing waves in Ship It! brand blue (#0F62FE).
+    // Opposite directions + offset phase → lines weave through each other.
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.9, controls.react * open,  1, "#0F62FE", 4, 210, 0.0,      0);
+    drawNeonWaveLine(audio.wave, waveWidth, bandHeight * 0.9, controls.react * open, -1, "#0F62FE", 4, 210, PI * 0.6, 0);
 
     drawingContext.shadowBlur = 0;
     blendMode(BLEND);
-
     pop();
 }
 
@@ -437,17 +452,33 @@ function initHomeScreen() {
     if (startButton) {
         startButton.addEventListener("click", handleStartTap);
     }
+
+    // Wire all scenario option buttons
+    document.querySelectorAll(".scenario-option-btn").forEach(btn => {
+        btn.addEventListener("click", () => handleScenarioSelect(btn.dataset.scenarioKey));
+    });
+
     // Any touch anywhere on the experience (outside home screen) resets the
     // idle timer so a visitor actively watching won't get kicked to home.
     document.addEventListener("touchstart", onUserActivity, { passive: true });
     document.addEventListener("click", onUserActivity, { passive: true });
 }
 
+// HOME → SCENARIO SELECT
 function handleStartTap() {
     // userStartAudio() MUST be called synchronously inside a user-gesture
     // handler — this is the iOS Web Audio context unlock mechanism.
     userStartAudio();
-    hideHomeScreen();
+    showScenarioSelectScreen();
+    resetIdleTimer();
+}
+
+// SCENARIO SELECT → VISUALIZER
+function handleScenarioSelect(scenarioKey) {
+    const sequenceIndex = SCENARIO_KEY_MAP[scenarioKey] ?? 0;
+    currentScenarioKey = scenarioKey;
+
+    hideScenarioSelectScreen();
 
     const playButton = document.getElementById("playButton");
     if (playButton) {
@@ -455,15 +486,31 @@ function handleStartTap() {
         playButton.textContent = "Play";
     }
 
-    // Start the typing animation; audio fires automatically once typing
-    // completes (or retries until isReady if still loading).
-    startPromptTyping();
+    // If the preloaded scenario matches the selection, start immediately;
+    // otherwise load the correct one (non-preload so typing begins at once).
+    if (activeSequenceIndex === sequenceIndex && isReady) {
+        startPromptTyping();
+    } else {
+        loadScenario(sequenceIndex);
+    }
+
     resetIdleTimer();
 }
 
+function showScenarioSelectScreen() {
+    currentScreen = "select";
+    document.getElementById("homeScreen").classList.add("is-hidden");
+    document.getElementById("scenarioSelectScreen").classList.remove("is-hidden");
+}
+
+function hideScenarioSelectScreen() {
+    currentScreen = "visualizer";
+    document.getElementById("scenarioSelectScreen").classList.add("is-hidden");
+}
+
 function showHomeScreen() {
-    if (homeScreenVisible) return;
-    homeScreenVisible = true;
+    if (currentScreen === "home") return;
+    currentScreen = "home";
 
     clearIdleTimer();
     clearScenarioTimers();
@@ -475,17 +522,17 @@ function showHomeScreen() {
         scenarioPromptElement.textContent = "";
     }
 
-    const el = document.getElementById("homeScreen");
-    if (el) el.classList.remove("is-hidden");
+    document.getElementById("scenarioSelectScreen").classList.add("is-hidden");
+    document.getElementById("homeScreen").classList.remove("is-hidden");
 
     // Preload scenario 0 silently so it's ready for the next visitor
     loadScenario(0, { preloadOnly: true });
 }
 
 function hideHomeScreen() {
-    homeScreenVisible = false;
-    const el = document.getElementById("homeScreen");
-    if (el) el.classList.add("is-hidden");
+    // Kept for any future direct call; showScenarioSelectScreen handles the
+    // visual transition now.
+    document.getElementById("homeScreen").classList.add("is-hidden");
 }
 
 function resetIdleTimer() {
@@ -505,8 +552,8 @@ function handleIdleTimeout() {
 }
 
 function onUserActivity() {
-    // Only reset the idle timer once the experience is active
-    if (!homeScreenVisible) {
+    // Reset idle timer on any screen except home (which has no timer running)
+    if (currentScreen !== "home") {
         resetIdleTimer();
     }
 }
@@ -712,28 +759,31 @@ function renderScenarioTopicIndicators() {
 
     scenarioTopicNavElement.replaceChildren();
     scenarioTopicButtons = SCENARIO_SEQUENCE.map((scenarioIndex, sequenceIndex) => {
-        const scenario = SCENARIOS[scenarioIndex];
-        const button = document.createElement("button");
-        const kicker = document.createElement("span");
-        const title = document.createElement("span");
-        const progress = document.createElement("span");
+        const navLabel = SCENARIO_NAV_LABELS[sequenceIndex] || { letter: String(sequenceIndex + 1), name: "" };
+
+        const button   = document.createElement("button");
+        const iconEl   = document.createElement("span");
+        const letterEl = document.createElement("span");
+        const nameEl   = document.createElement("span");
 
         button.type = "button";
         button.className = "scenario-topic-button";
         button.dataset.sequenceIndex = String(sequenceIndex);
-        button.setAttribute("aria-label", "Restart " + getScenarioTopicTitle(sequenceIndex));
+        button.setAttribute("aria-label", navLabel.letter + ": " + navLabel.name);
 
-        kicker.className = "scenario-topic-kicker";
-        kicker.textContent = "Topic " + (sequenceIndex + 1);
+        iconEl.className = "nav-icon";
+        iconEl.setAttribute("aria-hidden", "true");
 
-        title.className = "scenario-topic-title";
-        title.textContent = scenario.topicTitle || scenario.label;
+        letterEl.className = "scenario-topic-letter";
+        letterEl.textContent = navLabel.letter;
+        letterEl.setAttribute("aria-hidden", "true");
 
-        progress.className = "scenario-topic-progress";
-        progress.setAttribute("aria-hidden", "true");
+        nameEl.className = "scenario-topic-name";
+        nameEl.textContent = navLabel.name;
+        nameEl.setAttribute("aria-hidden", "true");
 
-        button.append(kicker, title, progress);
-        button.addEventListener("click", () => restartScenarioTopic(sequenceIndex));
+        button.append(iconEl, letterEl, nameEl);
+        button.addEventListener("click", () => handleNavButtonTap(sequenceIndex));
         scenarioTopicNavElement.appendChild(button);
 
         return button;
@@ -756,6 +806,27 @@ function restartScenarioTopic(sequenceIndex) {
         skipPromptTyping: true,
         autoStartAudio: true
     });
+}
+
+// Nav bar tap handler (replaces direct restartScenarioTopic calls from nav).
+// Active column → pause/resume. Inactive column → load & play that scenario.
+function handleNavButtonTap(sequenceIndex) {
+    userStartAudio();
+    resetIdleTimer();
+
+    if (!isUploadedAudio && sequenceIndex === activeSequenceIndex) {
+        // Active column: toggle pause / resume
+        if (isRealAudioActive && song && typeof song.isPlaying === "function" && song.isPlaying()) {
+            song.pause();
+            isRealAudioActive = false;
+            document.getElementById("playButton").textContent = "Play";
+        } else if (song && isReady) {
+            resumeScenarioAudio();
+        }
+    } else {
+        // Inactive column: immediately load and play the chosen scenario
+        loadScenario(sequenceIndex, { skipPromptTyping: true, autoStartAudio: true });
+    }
 }
 
 function restartActiveScenarioAudio() {
@@ -782,7 +853,11 @@ function restartActiveScenarioAudio() {
 function updateScenarioTopicIndicators() {
     if (!scenarioTopicButtons.length) return;
 
-    const progress = updateActiveScenarioProgress();
+    // Still need to call this every frame to keep activeScenarioProgress fresh
+    updateActiveScenarioProgress();
+
+    const isPlaying = isRealAudioActive &&
+        song && typeof song.isPlaying === "function" && song.isPlaying();
 
     scenarioTopicButtons.forEach((button, sequenceIndex) => {
         const isActive = !isUploadedAudio && sequenceIndex === activeSequenceIndex;
@@ -790,11 +865,15 @@ function updateScenarioTopicIndicators() {
 
         if (isActive) {
             button.setAttribute("aria-current", "step");
+            const iconEl = button.querySelector(".nav-icon");
+            if (iconEl) {
+                // Only write to the DOM when the value actually changes
+                const nextIcon = isPlaying ? "⏸" : "▶";
+                if (iconEl.textContent !== nextIcon) iconEl.textContent = nextIcon;
+            }
         } else {
             button.removeAttribute("aria-current");
         }
-
-        button.style.setProperty("--topic-progress", isActive ? progress.toFixed(4) : "0");
     });
 }
 

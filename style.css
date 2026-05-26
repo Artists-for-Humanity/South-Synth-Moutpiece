@@ -124,33 +124,50 @@
       white-space: nowrap;
     }
 
+    /* ── Zone 1: System log (top ~20 % = 216 px) ─────────────── */
+
     .scenario-copy {
       position: fixed;
-      z-index: 1;
-      inset: 0;
+      /* Above canvas (2), nav (6), speech bubble (4), title-card (5) */
+      z-index: 7;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 216px;
       display: flex;
-      align-items: flex-start;
+      /* Anchor log to bottom so newest lines always sit at zone floor */
+      align-items: flex-end;
       justify-content: center;
-      padding: clamp(18px, 4vh, 40px) clamp(18px, 6vw, 80px) 28px;
+      padding: 12px 40px;
+      background: #000;
       overflow: hidden;
       pointer-events: none;
+      /* Gradient mask: lines emerge from the bottom and read clearly at top */
+      -webkit-mask-image: linear-gradient(
+        to top,
+        transparent 0%,
+        black 38%
+      );
+      mask-image: linear-gradient(
+        to top,
+        transparent 0%,
+        black 38%
+      );
     }
 
     .scenario-log {
       display: grid;
-      gap: 10px;
-      margin-top: 0;
-      /* width: min(1020px, 100%); */
-      width: min(2020px, 100%);
-      /* color: rgba(210, 210, 218, 0.12); */
-      color: rgba(210, 210, 218, 0.38);
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      /* font-size: clamp(17px, 2.4vw, 34px); */
-      font-size: 2.4vw;
-      font-weight: 800;
-      line-height: 1.18;
-      text-align: left;
-      text-shadow: 0 0 22px rgba(0, 0, 0, 0.95);
+      gap: 8px;
+      width: 100%;
+      color: rgba(243, 229, 255, 0.40);
+      font-family: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 36px;
+      text-align: center;
+      letter-spacing: -1.68px;
+      text-shadow: none;
       transition: transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
       will-change: transform;
     }
@@ -170,123 +187,151 @@
       transform: translateY(14px);
     }
 
+    /* ── Zone 4: Scenario nav bar (bottom 160 px) ───────────── */
+
     .scenario-topic-nav {
       position: fixed;
-      z-index: 4;
-      top: clamp(76px, 10vh, 104px);
-      left: 50%;
+      /* Above canvas (2), speech bubble (4), title-card (5); below log (7) */
+      z-index: 6;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 160px;
+      width: 100%;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: clamp(12px, 2vw, 28px);
-      width: min(1020px, calc(100vw - 48px));
-      transform: translateX(-50%);
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
       pointer-events: none;
     }
 
     .scenario-topic-button {
-      --topic-progress: 0;
       position: relative;
       display: flex;
-      min-height: 106px;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      overflow: hidden;
-      padding: 18px 20px 22px;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      border-radius: 14px;
-      background: rgba(24, 20, 28, 0.86);
-      box-shadow: 0 16px 52px rgba(0, 0, 0, 0.2);
+      gap: 8px;
+      height: 160px;
+      /* Override the global button border — columns separated by left border */
+      border: none;
+      border-left: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 0;
+      background: #000;
       color: #fff;
       cursor: pointer;
       pointer-events: auto;
       text-align: center;
-      transition:
-        background 220ms ease,
-        border-color 220ms ease,
-        transform 220ms ease;
+      transition: background 200ms ease;
     }
 
-    /* Touch device: use :active instead of :hover */
-    .scenario-topic-button:active,
-    .scenario-topic-button:focus-visible {
-      background: rgba(42, 35, 49, 0.94);
-      border-color: rgba(255, 255, 255, 0.14);
-      transform: translateY(-2px);
+    .scenario-topic-button:first-child {
+      border-left: none;
     }
 
-    .scenario-topic-button:focus-visible {
-      outline: 2px solid rgba(255, 255, 255, 0.78);
-      outline-offset: 4px;
-    }
-
+    /* Active column: Ship It! blue fill */
     .scenario-topic-button.is-active {
-      background: rgba(67, 55, 78, 0.94);
-      border-color: rgba(255, 255, 255, 0.1);
+      background: #0F62FE;
+      border-left: none;
     }
 
-    .scenario-topic-kicker {
-      color: #b8abc7;
-      /* 18 px floor — legible at arm's length on 810 px iPad */
-      font-size: clamp(18px, 2.2vw, 21px);
-      font-weight: 800;
+    /* No double-border next to active column */
+    .scenario-topic-button.is-active + .scenario-topic-button {
+      border-left: none;
+    }
+
+    .scenario-topic-button:active {
+      opacity: 0.85;
+    }
+
+    /* Pause / play icon — only visible when column is active */
+    .scenario-topic-button .nav-icon {
+      display: none;
+      font-size: 40px;
       line-height: 1;
-      text-transform: uppercase;
-    }
-
-    .scenario-topic-title {
-      max-width: 100%;
       color: #fff;
-      /* 18 px floor — legible at arm's length on 810 px iPad */
-      font-size: clamp(18px, 2.5vw, 25px);
-      font-weight: 800;
-      line-height: 1.12;
-      overflow-wrap: anywhere;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-style: normal;
     }
 
-    .scenario-topic-progress {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: #fff;
-      opacity: 0;
-      transform: scaleX(var(--topic-progress));
-      transform-origin: left center;
-      transition: opacity 180ms ease;
+    .scenario-topic-button.is-active .nav-icon {
+      display: block;
     }
 
-    .scenario-topic-button.is-active .scenario-topic-progress {
-      opacity: 1;
+    /* Letter (A / B / C) — hidden when active */
+    .scenario-topic-button .scenario-topic-letter {
+      display: block;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
     }
+
+    /* Scenario name — hidden when active */
+    .scenario-topic-button .scenario-topic-name {
+      display: block;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #fff;
+    }
+
+    .scenario-topic-button.is-active .scenario-topic-letter,
+    .scenario-topic-button.is-active .scenario-topic-name {
+      display: none;
+    }
+
+    /* ── Zone 3: Speech bubble (between wave and nav) ────────── */
 
     .scenario-prompt-layer {
       position: fixed;
       z-index: 4;
-      top: clamp(164px, 20vh, 226px);
+      /* Flush below wave zone (top 216+162=378 px), above nav bar (160 px) */
+      top: 378px;
+      bottom: 160px;
       left: 0;
       right: 0;
       display: flex;
+      align-items: center;
       justify-content: center;
-      min-height: clamp(214px, 34vh, 300px);
-      padding: clamp(74px, 9vh, 112px) clamp(18px, 5vw, 64px) 76px;
       pointer-events: none;
     }
 
+    /* White rounded-rectangle speech bubble with left-pointing tail */
+    .speech-bubble {
+      position: relative;
+      width: 520px;
+      min-height: 180px;
+      padding: 28px 36px;
+      background: #fff;
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Left-pointing tail — human speaker addressing the AI */
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 18px solid transparent;
+      border-bottom: 18px solid transparent;
+      border-right: 20px solid #fff;
+    }
+
     .scenario-prompt-line {
-      width: min(1100px, 100%);
-      min-height: 88px;
-      color: #fff;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: clamp(28px, 4.4vw, 58px);
-      font-weight: 800;
-      line-height: 1.08;
+      width: 100%;
+      color: #111;
+      font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.3;
       text-align: center;
-      text-shadow:
-        0 0 18px rgba(0, 0, 0, 1),
-        0 0 20px rgba(255, 255, 255, 0.16);
+      text-shadow: none;
     }
 
     .typing-caret {
@@ -295,8 +340,9 @@
       height: 1.08em;
       margin-left: 0.08em;
       vertical-align: -0.16em;
-      background: #fff;
-      box-shadow: 0 0 16px rgba(255, 255, 255, 0.8);
+      /* Dark caret to match text colour inside white bubble */
+      background: #111;
+      box-shadow: none;
       animation: caretBlink 840ms steps(1, end) infinite;
     }
 
@@ -351,7 +397,7 @@
       display: flex;
       flex-direction: column;
       padding: 60px 40px 30px;
-      background: #1B4EFF;
+      background: #0F62FE;
     }
 
     .home-screen.is-hidden {
@@ -405,6 +451,72 @@
       opacity: 0.80;
     }
 
+    /* ── Scenario selection screen ──────────────────────────────── */
+
+    .scenario-select-screen {
+      position: fixed;
+      z-index: 99; /* just below home screen (100), above everything else */
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 80px;
+      padding: 60px 40px 30px;
+      background: #000;
+    }
+
+    .scenario-select-screen.is-hidden {
+      display: none;
+    }
+
+    .scenario-select-heading {
+      margin: 0;
+      color: #fff;
+      font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+      font-size: 56px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 64px;
+    }
+
+    .scenario-select-options {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .scenario-option-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 168px;
+      padding: 0 32px;
+      border: 2px solid #fff;
+      border-radius: 0;
+      background: #000;
+      color: #fff;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      /* scale pulse on tap instead of color change */
+      transition: transform 100ms ease, border-color 100ms ease;
+    }
+
+    .scenario-option-btn:active {
+      transform: scale(0.97);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .scenario-option-label {
+      color: #fff;
+      text-align: center;
+      font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+      font-size: 48px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 154.4%;
+      pointer-events: none;
+    }
+
     /* ── Small screens (< 760 px) ────────────────────────────── */
 
     @media (max-width: 760px) {
@@ -431,36 +543,35 @@
         overflow: hidden;
       }
 
+      /* Nav bar: scale down for narrow screens */
       .scenario-topic-nav {
-        top: 116px;
-        gap: 8px;
-        width: calc(100vw - 20px);
+        height: 120px;
       }
 
       .scenario-topic-button {
-        min-height: 78px;
-        gap: 7px;
-        padding: 12px 8px 15px;
-        border-radius: 10px;
+        height: 120px;
       }
 
-      .scenario-topic-kicker {
-        font-size: clamp(11px, 3.1vw, 14px);
+      .scenario-topic-button .scenario-topic-letter {
+        font-size: 36px;
       }
 
-      .scenario-topic-title {
-        font-size: clamp(12px, 3.5vw, 16px);
-        line-height: 1.14;
+      .scenario-topic-button .scenario-topic-name {
+        font-size: 16px;
       }
 
+      /* Speech bubble: narrower on small screens */
       .scenario-prompt-layer {
-        top: 196px;
-        min-height: 188px;
-        padding: 22px 18px 56px;
+        top: 300px;
+        bottom: 120px;
+      }
+
+      .speech-bubble {
+        width: calc(100vw - 64px);
+        padding: 20px 24px;
       }
 
       .scenario-prompt-line {
-        min-height: 112px;
-        font-size: clamp(24px, 8vw, 38px);
+        font-size: 24px;
       }
     }
