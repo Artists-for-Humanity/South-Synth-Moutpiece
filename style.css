@@ -9,6 +9,21 @@
       background: #000;
       color: #f7f3ea;
       font-family: Arial, Helvetica, sans-serif;
+      /* Kiosk: suppress text selection, long-press menu, and tap highlight */
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      /* Prevents double-tap zoom; allows single-tap without 300 ms delay */
+      touch-action: manipulation;
+    }
+
+    /* Restore text selection inside form controls */
+    input,
+    textarea,
+    select {
+      -webkit-user-select: text;
+      user-select: text;
     }
 
     canvas {
@@ -70,9 +85,10 @@
 
     button,
     select {
-      min-height: 32px;
+      /* 56 px minimum touch target (kiosk / touch-only device) */
+      min-height: 56px;
       border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 6px;
+      border-radius: 0px;
       background: #151926;
       color: #f7f3ea;
     }
@@ -192,7 +208,8 @@
         transform 220ms ease;
     }
 
-    .scenario-topic-button:hover,
+    /* Touch device: use :active instead of :hover */
+    .scenario-topic-button:active,
     .scenario-topic-button:focus-visible {
       background: rgba(42, 35, 49, 0.94);
       border-color: rgba(255, 255, 255, 0.14);
@@ -211,7 +228,8 @@
 
     .scenario-topic-kicker {
       color: #b8abc7;
-      font-size: clamp(14px, 1.45vw, 21px);
+      /* 18 px floor — legible at arm's length on 810 px iPad */
+      font-size: clamp(18px, 2.2vw, 21px);
       font-weight: 800;
       line-height: 1;
       text-transform: uppercase;
@@ -220,7 +238,8 @@
     .scenario-topic-title {
       max-width: 100%;
       color: #fff;
-      font-size: clamp(16px, 1.6vw, 25px);
+      /* 18 px floor — legible at arm's length on 810 px iPad */
+      font-size: clamp(18px, 2.5vw, 25px);
       font-weight: 800;
       line-height: 1.12;
       overflow-wrap: anywhere;
@@ -322,6 +341,71 @@
       visibility: hidden;
       opacity: 0;
     }
+
+    /* ── Home / attract screen ───────────────────────────────── */
+
+    .home-screen {
+      position: fixed;
+      z-index: 100; /* covers canvas (2), toolbar (3), nav (4), title card (5) */
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 40px 30px;
+      background: #1B4EFF;
+    }
+
+    .home-screen.is-hidden {
+      display: none;
+    }
+
+    .home-text {
+      flex: 1;
+    }
+
+    .home-quote {
+      margin: 0 0 64px;
+      color: #fff;
+      font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+      font-size: 64px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 64px;
+    }
+
+    .home-attribution {
+      margin: 0;
+      color: #fff;
+      font-family: "IBM Plex Sans Condensed", system-ui, -apple-system, sans-serif;
+      font-size: 40px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 40px;
+    }
+
+    .home-start-btn {
+      display: block;
+      width: 100%;
+      min-height: 100px;
+      margin-top: auto; /* pushed to bottom of flex column */
+      border: none;
+      border-radius: 0;
+      background: #fff;
+      color: #000;
+      font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      transition: opacity 120ms ease;
+    }
+
+    .home-start-btn:active {
+      opacity: 0.80;
+    }
+
+    /* ── Small screens (< 760 px) ────────────────────────────── */
 
     @media (max-width: 760px) {
       body {

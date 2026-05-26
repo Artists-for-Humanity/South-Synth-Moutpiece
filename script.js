@@ -1,5 +1,10 @@
 const AUDIO_START_AFTER_PROMPT_MS = 2000;
 const BETWEEN_SCENARIOS_MS = 2600;
+// Kiosk idle reset: return to home screen after this many ms with no touch input
+const IDLE_TIMEOUT_MS = 90 * 1000;
+
+// Pre-allocated wave buffer — reused every frame to avoid per-frame allocation
+const IDLE_WAVE_BUFFER = new Array(256).fill(0);
 
 const DATA_WORKER_TITLE =
   "Composite drawn from interviews with data annotation workers in Kenya and the Philippines. Sources: Karen Hao, MIT Technology Review and Empire of AI (2025); Billy Perrigo, TIME (2023); Adrienne Williams, Milagros Miceli, Timnit Gebru, Noema (2022).";
@@ -154,21 +159,22 @@ let scenarioLogScrollY = 0;
 let activeScenarioProgress = 0;
 let activePlaybackToken = 0;
 
+// Home screen / idle state
+let homeScreenVisible = true;
+let idleTimerId = null;
+
 function setup() {
     createCanvas(windowWidth, windowHeight);
     pixelDensity(1);
-    //turn off default fill for all shapes ( mostly working in lines)
     noFill();
 
-
-    //create fft analyzer with smoth and bin settings
     fft = new p5.FFT(LOOK.fftSmooth, LOOK.fftBins);
-    //create amplitude analyzer for loudness
     amplitude = new p5.Amplitude();
 
-    //set up event listeners for file input and controls
     wireControls();
-    loadDefaultSong();
+    initHomeScreen();
+    // Preload scenario 0 silently so audio is ready the moment START is tapped
+    loadScenario(0, { preloadOnly: true });
 }
 
 function draw() {
@@ -357,19 +363,19 @@ function audioIsPlaying() {
     return isReady && isRealAudioActive && song && song.isPlaying() && !activePart?.idleVisualizer;
 }
 
-// generates idle audio for no sound
+// generates idle audio for no sound — reuses IDLE_WAVE_BUFFER to avoid
+// per-frame heap allocation (important for a 6-day continuous run)
 function idleAudio() {
-    const wave = [];
     for (let i = 0; i < 256; i++) {
-    wave.push(sin(frameCount * 0.025 + i * 0.08) * 0.04);
+        IDLE_WAVE_BUFFER[i] = sin(frameCount * 0.025 + i * 0.08) * 0.04;
     }
 
     return {
-    wave,
-    bass: 0.04,
-    mids: 0.03,
-    treble: 0.02,
-    level: 0
+        wave: IDLE_WAVE_BUFFER,
+        bass: 0.04,
+        mids: 0.03,
+        treble: 0.02,
+        level: 0
     };
 }
 
@@ -424,15 +430,93 @@ function wireControls() {
     renderScenarioLog(-1);
 }
 
-// upload default song + status updates while loading, error handling
-function loadDefaultSong() {
-    loadScenario(0);
+// ── Home screen & idle reset ──────────────────────────────────────────────
+
+function initHomeScreen() {
+    const startButton = document.getElementById("startButton");
+    if (startButton) {
+        startButton.addEventListener("click", handleStartTap);
+    }
+    // Any touch anywhere on the experience (outside home screen) resets the
+    // idle timer so a visitor actively watching won't get kicked to home.
+    document.addEventListener("touchstart", onUserActivity, { passive: true });
+    document.addEventListener("click", onUserActivity, { passive: true });
+}
+
+function handleStartTap() {
+    // userStartAudio() MUST be called synchronously inside a user-gesture
+    // handler — this is the iOS Web Audio context unlock mechanism.
+    userStartAudio();
+    hideHomeScreen();
+
+    const playButton = document.getElementById("playButton");
+    if (playButton) {
+        playButton.disabled = false;
+        playButton.textContent = "Play";
+    }
+
+    // Start the typing animation; audio fires automatically once typing
+    // completes (or retries until isReady if still loading).
+    startPromptTyping();
+    resetIdleTimer();
+}
+
+function showHomeScreen() {
+    if (homeScreenVisible) return;
+    homeScreenVisible = true;
+
+    clearIdleTimer();
+    clearScenarioTimers();
+    stopLoadedScenarioSounds();
+    resetScenarioLog();
+    showScenarioTitleCard("");
+
+    if (scenarioPromptElement) {
+        scenarioPromptElement.textContent = "";
+    }
+
+    const el = document.getElementById("homeScreen");
+    if (el) el.classList.remove("is-hidden");
+
+    // Preload scenario 0 silently so it's ready for the next visitor
+    loadScenario(0, { preloadOnly: true });
+}
+
+function hideHomeScreen() {
+    homeScreenVisible = false;
+    const el = document.getElementById("homeScreen");
+    if (el) el.classList.add("is-hidden");
+}
+
+function resetIdleTimer() {
+    clearIdleTimer();
+    idleTimerId = setTimeout(handleIdleTimeout, IDLE_TIMEOUT_MS);
+}
+
+function clearIdleTimer() {
+    if (idleTimerId !== null) {
+        clearTimeout(idleTimerId);
+        idleTimerId = null;
+    }
+}
+
+function handleIdleTimeout() {
+    showHomeScreen();
+}
+
+function onUserActivity() {
+    // Only reset the idle timer once the experience is active
+    if (!homeScreenVisible) {
+        resetIdleTimer();
+    }
 }
 
 function loadScenario(sequenceIndex, options = {}) {
     const loadOptions = {
         skipPromptTyping: false,
         autoStartAudio: false,
+        // preloadOnly: load audio silently; don't touch any UI or start typing
+        preloadOnly: false,
         ...options
     };
 
@@ -458,16 +542,17 @@ function loadScenario(sequenceIndex, options = {}) {
     showScenarioTitleCard("");
     updateScenarioTopicIndicators();
 
-    const playButton = document.getElementById("playButton");
-    playButton.disabled = true;
-    playButton.textContent = "Play";
+    if (!loadOptions.preloadOnly) {
+        const playButton = document.getElementById("playButton");
+        playButton.disabled = true;
+        playButton.textContent = "Play";
+        setStatus("Loading " + getScenarioTopicTitle(activeSequenceIndex) + "...");
 
-    setStatus("Loading " + getScenarioTopicTitle(activeSequenceIndex) + "...");
-
-    if (loadOptions.skipPromptTyping) {
-        showPromptImmediately();
-    } else {
-        startPromptTyping();
+        if (loadOptions.skipPromptTyping) {
+            showPromptImmediately();
+        } else {
+            startPromptTyping();
+        }
     }
 
     const loadToken = ++scenarioLoadToken;
@@ -492,6 +577,11 @@ function useLoadedScenario(loadOptions = {}) {
     isReady = true;
     song = loadedScenarioSounds[0];
     setActiveSound(song);
+
+    if (loadOptions.preloadOnly) {
+        // Audio is ready; wait for the visitor to press START before touching UI
+        return;
+    }
 
     const playButton = document.getElementById("playButton");
     playButton.disabled = false;
@@ -1077,8 +1167,10 @@ function stopLoadedScenarioSounds() {
   }
 
   loadedScenarioSounds.forEach(sound => {
-    if (sound && typeof sound.stop === "function") {
-      sound.stop();
-    }
+    if (!sound) return;
+    if (typeof sound.stop === "function") sound.stop();
+    // dispose() removes the SoundFile from p5.soundArray and disconnects its
+    // Web Audio nodes — prevents AudioBuffer accumulation over multi-day runs
+    if (typeof sound.dispose === "function") sound.dispose();
   });
 }

@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>South Synth Mouthpiece</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@700&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="toolbar">
+  <div class="toolbar hidden">
     <input id="audioFile" type="file" accept="audio/*">
     <button id="playButton" disabled>Play</button>
 
@@ -58,6 +61,15 @@
   </section>
 
   <section id="scenarioTitleCard" class="scenario-title-card is-hidden" aria-live="polite"></section>
+
+  <!-- Home / attract screen -->
+  <div id="homeScreen" class="home-screen">
+    <div class="home-text">
+      <p class="home-quote">&ldquo;A computer can never be held accountable, therefore a computer must never make a management decision.&rdquo;</p>
+      <p class="home-attribution">IBM Training Manual, 1979</p>
+    </div>
+    <button id="startButton" class="home-start-btn" type="button">START</button>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>
