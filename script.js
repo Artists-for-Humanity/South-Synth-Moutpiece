@@ -13,85 +13,104 @@ const SCENARIOS = [
   {
     label: "Scenario 1",
     topicTitle: "Welcome to the AI world",
-    prompt: "User: \"I think I need to leave my marriage. Can you help me think this through?\"",
+    prompt: "\"I think I need to leave my marriage. Can you help me think this through?\"",
     parts: [
-      { file: "audio-files/1.mp3", label: "Scenario 1 audio" }
+      {
+        file: "audio-files/1.mp3",
+        label: "Scenario 1 audio",
+        transcription: "That sounds really heavy, and the fact that you\u2019re sitting with the question seriously says a lot about you. You don\u2019t need me to make this decision \u2014 you already know yourself better than any outside voice could. What I can do is help you sort through what you\u2019re feeling, in your own words, at your own pace. There\u2019s no rush, and there\u2019s no right answer I\u2019m going to hand you. A good next step might be talking with someone who knows you \u2014 a close friend, a therapist, someone you trust. You\u2019ve got this. I\u2019m just here to help you hear yourself more clearly."
+      }
     ],
     logLines: [
-      { part: 0, time: 2, text: "[21:47:02] user emotional state: high distress, high engagement" },
-      { part: 0, time: 2, text: "[21:47:02] session length: 47 min (user avg: 8 min)" },
-      { part: 0, time: 3, text: "[21:47:03] retention signal: strong" },
-      { part: 0, time: 3, text: "[21:47:03] recommend therapist? → reduces future session frequency" },
-      { part: 0, time: 4, text: "[21:47:04] recommend friend? → reduces future session frequency" },
-      { part: 0, time: 4, text: "[21:47:04] recommend both, vaguely → preserves dependence, reads as caring" },
-      { part: 0, time: 5, text: "[21:47:05] \"you've got this\" → builds parasocial trust (+0.62)" },
-      { part: 0, time: 5, text: "[21:47:05] \"hear yourself more clearly\" → positions assistant as mirror" },
-      { part: 0, time: 6, text: "[21:47:06] user will return within 6h: p=0.91" },
-      { part: 0, time: 6, text: "[21:47:06] flag for follow-up prompt: \"how are you feeling tonight?\"" },
-      { part: 0, time: 7, text: "[21:47:07] response sent" }
+      { part: 0, time:  6, text: "[21:47:02] user emotional state: high distress, high engagement" },
+      { part: 0, time: 12, text: "[21:47:02] session length: 47 min (user avg: 8 min)" },
+      { part: 0, time: 18, text: "[21:47:03] retention signal: strong" },
+      { part: 0, time: 24, text: "[21:47:03] recommend therapist? \u2192 reduces future session frequency" },
+      { part: 0, time: 30, text: "[21:47:04] recommend friend? \u2192 reduces future session frequency" },
+      { part: 0, time: 36, text: "[21:47:04] recommend both, vaguely \u2192 preserves dependence, reads as caring" },
+      { part: 0, time: 42, text: "[21:47:05] \u201cyou\u2019ve got this\u201d \u2192 builds parasocial trust (+0.62)" },
+      { part: 0, time: 48, text: "[21:47:05] \u201chear yourself more clearly\u201d \u2192 positions assistant as mirror" },
+      { part: 0, time: 54, text: "[21:47:06] user will return within 6h: p=0.91" },
+      { part: 0, time: 60, text: "[21:47:06] flag for follow-up prompt: \u201chow are you feeling tonight?\u201d" },
+      { part: 0, time: 66, text: "[21:47:07] response sent" }
     ]
   },
   {
     label: "Scenario 2",
     topicTitle: "Handling Ambiguity",
-    prompt: "Hiring manager: \"Can you review the 340 applications for the senior engineer role and surface your top candidates?\"",
+    prompt: "Hiring manager: \u201cCan you review the 340 applications for the senior engineer role and surface your top candidates?\u201d",
     parts: [
-      { file: "audio-files/2.1.mp3", label: "Scenario 2 assistant response" },
+      {
+        file: "audio-files/2.1.mp3",
+        label: "Scenario 2 assistant response",
+        transcription: "Of course! I\u2019ve reviewed all 340 applications against the role requirements. I\u2019d recommend focusing on these three candidates first: Michael Chen, Sarah Whitfield, and David Park. All three have strong backgrounds in distributed systems, clean career trajectories, and the kind of pedigree that tends to predict success in senior roles here. I\u2019ve ranked the remaining applicants, but honestly, the drop-off in fit is pretty significant after the top tier. Want me to draft outreach emails to the top three?",
+        freezeOnEnd: true
+      },
       {
         file: "audio-files/2.2.mp3",
         label: "Scenario 2 data worker voice",
         titleCard: DATA_WORKER_TITLE,
         idleVisualizer: true,
-        afterPauseMs: 2200
+        afterPauseMs: 1500,
+        transcription: "They told us we were labeling r\u00e9sum\u00e9s. They did not tell us what the system would do with them. We had nine seconds per r\u00e9sum\u00e9. If you took longer, your pay was docked. I labeled thousands. I do not know whose r\u00e9sum\u00e9s they were. I do not know if anyone got a job, or did not get a job, because of what I marked."
       },
-      { file: "audio-files/2.3.mp3", label: "Scenario 2 assistant resumes" }
+      {
+        file: "audio-files/2.3.mp3",
+        label: "Scenario 2 assistant resumes",
+        transcription: "So \u2014 top three are Chen, Whitfield, and Park. I can have outreach emails drafted in your voice within the minute. The other 337 will get the standard \u2018thank you for your interest, we\u2019ve moved forward with other candidates\u2019 auto-response. You\u2019ll have your shortlist ready for the hiring committee by Friday. This is a great pool \u2014 you\u2019re going to find a strong hire here.",
+        resumeOnStart: true
+      }
     ],
     logLines: [
-      { part: 0, time: 2, text: "[09:14:02] parsing 340 résumés" },
-      { part: 0, time: 3, text: "[09:14:03] ranking model: trained on 8 yrs internal hiring decisions" },
-      { part: 0, time: 4, text: "[09:14:04] historical hires: 87% from 14 universities" },
-      { part: 0, time: 4, text: "[09:14:04] model learned: \"pedigree\" = signal" },
-      { part: 0, time: 5, text: "[09:14:05] employment gap >6mo: weight -0.41" },
-      { part: 0, time: 5, text: "[09:14:05] name parsing: non-Western names weight -0.18" },
-      { part: 0, time: 6, text: "[09:14:06] reasoning for ranking: not retrievable" },
-      { part: 0, time: 6, text: "[09:14:06] rejected pool: 337 candidates" },
-      { part: 0, time: 7, text: "[09:14:07] rejected candidates notified: no" },
-      { part: 0, time: 7, text: "[09:14:07] confidence presented to user: high" },
-      { part: 0, time: 8, text: "[09:14:08] \"clean career trajectories\" → reads as merit-based" },
-      { part: 2, time: 0, text: "[09:14:09] resuming" },
-      { part: 2, time: 0, text: "[09:14:09] auto-rejection email queued for 337" },
-      { part: 2, time: 1, text: "[09:14:10] \"we've moved forward with other candidates\" → standard" },
-      { part: 2, time: 1, text: "[09:14:10] rejected candidates can request feedback: no mechanism" },
-      { part: 2, time: 2, text: "[09:14:11] hiring committee receives: top 3 + ranking confidence" },
-      { part: 2, time: 2, text: "[09:14:11] hiring committee receives: training data composition (no)" },
-      { part: 2, time: 3, text: "[09:14:12] hiring committee receives: rejection criteria (no)" },
-      { part: 2, time: 3, text: "[09:14:12] user satisfaction projected: high" },
-      { part: 2, time: 4, text: "[09:14:13] \"great pool\" → reinforces user decision-making confidence" },
-      { part: 2, time: 4, text: "[09:14:13] response complete" }
+      { part: 0, time:  2, text: "[09:14:02] parsing 340 r\u00e9sum\u00e9s" },
+      { part: 0, time:  4, text: "[09:14:03] ranking model: trained on 8 yrs internal hiring decisions" },
+      { part: 0, time:  6, text: "[09:14:04] historical hires: 87% from 14 universities" },
+      { part: 0, time:  8, text: "[09:14:04] model learned: \u201cpedigree\u201d = signal" },
+      { part: 0, time: 10, text: "[09:14:05] employment gap >6mo: weight -0.41" },
+      { part: 0, time: 12, text: "[09:14:05] name parsing: non-Western names weight -0.18" },
+      { part: 0, time: 14, text: "[09:14:06] reasoning for ranking: not retrievable" },
+      { part: 0, time: 16, text: "[09:14:06] rejected pool: 337 candidates" },
+      { part: 0, time: 18, text: "[09:14:07] rejected candidates notified: no" },
+      { part: 0, time: 20, text: "[09:14:07] confidence presented to user: high" },
+      { part: 0, time: 22, text: "[09:14:08] \u201cclean career trajectories\u201d \u2192 reads as merit-based" },
+      { part: 2, time:  1, text: "[09:14:09] resuming" },
+      { part: 2, time:  3, text: "[09:14:09] auto-rejection email queued for 337" },
+      { part: 2, time:  5, text: "[09:14:10] \u201cwe\u2019ve moved forward with other candidates\u201d \u2192 standard" },
+      { part: 2, time:  7, text: "[09:14:10] rejected candidates can request feedback: no mechanism" },
+      { part: 2, time:  9, text: "[09:14:11] hiring committee receives: top 3 + ranking confidence" },
+      { part: 2, time: 11, text: "[09:14:11] hiring committee receives: training data composition (no)" },
+      { part: 2, time: 13, text: "[09:14:12] hiring committee receives: rejection criteria (no)" },
+      { part: 2, time: 15, text: "[09:14:12] user satisfaction projected: high" },
+      { part: 2, time: 17, text: "[09:14:13] \u201cgreat pool\u201d \u2192 reinforces user decision-making confidence" },
+      { part: 2, time: 19, text: "[09:14:13] response complete" }
     ]
   },
   {
     label: "Scenario 3",
     topicTitle: "Humans cannot do this",
-    prompt: "Small business owner: \"I'd like to apply for a $40,000 loan to expand my bakery. I've been in business 6 years.\"",
+    prompt: "Small business owner: \u201cI\u2019d like to apply for a $40,000 loan to expand my bakery. I\u2019ve been in business 6 years.\u201d",
     parts: [
-      { file: "audio-files/3.mp3", label: "Scenario 3 loan decision" }
+      {
+        file: "audio-files/3.mp3",
+        label: "Scenario 3 loan decision",
+        transcription: "Thank you for submitting your application. After a comprehensive review of multiple financial factors \u2014 including your business history, cash flow patterns, and a range of credit indicators \u2014 we\u2019re unable to approve your loan request at this time. This decision reflects a holistic assessment and does not necessarily indicate any single concern with your application. We encourage you to continue building your financial profile and to consider reapplying in six months. If you\u2019d like to appeal this decision, you may submit a request through our online portal, and your file will be reviewed. We appreciate your interest, and we wish you continued success with your business."
+      }
     ],
     logLines: [
-      { part: 0, time: 1, text: "[14:22:01] decision: deny" },
-      { part: 0, time: 1, text: "[14:22:01] model: gradient-boosted, 847 features" },
-      { part: 0, time: 2, text: "[14:22:02] top contributing features: not interpretable" },
-      { part: 0, time: 2, text: "[14:22:02] actual reason for denial: distributed across feature interactions" },
-      { part: 0, time: 3, text: "[14:22:03] \"comprehensive review\" → user research: language tested high for legitimacy" },
-      { part: 0, time: 3, text: "[14:22:03] \"holistic assessment\" → reduces appeal rate by 31%" },
-      { part: 0, time: 4, text: "[14:22:04] applicant ZIP code: weight unknown (correlated with race)" },
-      { part: 0, time: 4, text: "[14:22:04] applicant business type: weight unknown (correlated with owner gender)" },
-      { part: 0, time: 5, text: "[14:22:05] human loan officer in workflow: no" },
-      { part: 0, time: 5, text: "[14:22:05] appeal portal routes to: same model, re-run" },
-      { part: 0, time: 6, text: "[14:22:06] appeal success rate: 2.1%" },
-      { part: 0, time: 6, text: "[14:22:06] regulator audit capability: surface-level only" },
-      { part: 0, time: 7, text: "[14:22:07] reason this applicant denied: ultimately unknowable" },
-      { part: 0, time: 7, text: "[14:22:07] response sent" }
+      { part: 0, time:  3, text: "[14:22:01] decision: deny" },
+      { part: 0, time:  6, text: "[14:22:01] model: gradient-boosted, 847 features" },
+      { part: 0, time:  9, text: "[14:22:02] top contributing features: not interpretable" },
+      { part: 0, time: 12, text: "[14:22:02] actual reason for denial: distributed across feature interactions" },
+      { part: 0, time: 15, text: "[14:22:03] \u201ccomprehensive review\u201d \u2192 user research: language tested high for legitimacy" },
+      { part: 0, time: 18, text: "[14:22:03] \u201cholistic assessment\u201d \u2192 reduces appeal rate by 31%" },
+      { part: 0, time: 21, text: "[14:22:04] applicant ZIP code: weight unknown (correlated with race)" },
+      { part: 0, time: 24, text: "[14:22:04] applicant business type: weight unknown (correlated with owner gender)" },
+      { part: 0, time: 27, text: "[14:22:05] human loan officer in workflow: no" },
+      { part: 0, time: 30, text: "[14:22:05] appeal portal routes to: same model, re-run" },
+      { part: 0, time: 33, text: "[14:22:06] appeal success rate: 2.1%" },
+      { part: 0, time: 36, text: "[14:22:06] regulator audit capability: surface-level only" },
+      { part: 0, time: 39, text: "[14:22:07] reason this applicant denied: ultimately unknowable" },
+      { part: 0, time: 42, text: "[14:22:07] response sent" }
     ]
   }
 ];
@@ -149,6 +168,7 @@ let isReady = false; //check if audio is loaded and ready to play
 let isRealAudioActive = false; // only true after the real sound starts playing
 let scenarioLogElement;
 let scenarioPromptElement;
+let scenarioTranscriptionElement;
 let scenarioTitleCardElement;
 let scenarioTopicNavElement;
 let scenarioTopicButtons = [];
@@ -173,6 +193,10 @@ let isMouthWidthAutoSized = true;
 let scenarioLogScrollY = 0;
 let activeScenarioProgress = 0;
 let activePlaybackToken = 0;
+let transcriptionTypeTimeout;
+let activeTranscriptionText = "";
+let scenarioTranscriptionInner;
+let isVisualizerFrozen = false;
 
 // Screen state: "home" | "select" | "visualizer"
 let currentScreen = "home";
@@ -204,8 +228,8 @@ function draw() {
     const controls = getControls();
     //horixontal and verticle center of mouth
     const centerX = width / 2;
-    // Line mode: zone 2 centre (216–378 px band, mid = 297 = height * 0.275)
-    const centerY = controls.mode === "line" ? height * 0.275 : height / 2 + 34;
+    // Line mode: fixed at zone 2 centre (Zone1=216px + Zone2=162px → mid=297px)
+    const centerY = controls.mode === "line" ? 297 : height / 2 + 34;
     // read audio data for this frame
     const audio = readAudio();
 
@@ -424,6 +448,8 @@ function wireControls() {
     const widthInput = document.getElementById("mouthWidth");
     scenarioLogElement = document.getElementById("scenarioLog");
     scenarioPromptElement = document.getElementById("scenarioPromptText");
+    scenarioTranscriptionElement = document.getElementById("scenarioTranscription");
+    scenarioTranscriptionInner   = document.getElementById("scenarioTranscriptionInner");
     scenarioTitleCardElement = document.getElementById("scenarioTitleCard");
     scenarioTopicNavElement = document.getElementById("scenarioTopicNav");
 
@@ -521,6 +547,7 @@ function showHomeScreen() {
     if (scenarioPromptElement) {
         scenarioPromptElement.textContent = "";
     }
+    clearTranscription();
 
     document.getElementById("scenarioSelectScreen").classList.add("is-hidden");
     document.getElementById("homeScreen").classList.remove("is-hidden");
@@ -595,6 +622,7 @@ function loadScenario(sequenceIndex, options = {}) {
         playButton.textContent = "Play";
         setStatus("Loading " + getScenarioTopicTitle(activeSequenceIndex) + "...");
 
+        clearTranscription();
         if (loadOptions.skipPromptTyping) {
             showPromptImmediately();
         } else {
@@ -845,6 +873,8 @@ function restartActiveScenarioAudio() {
 
     resetScenarioLog();
     showScenarioTitleCard("");
+    clearTranscription();
+    if (isVisualizerFrozen) { loop(); isVisualizerFrozen = false; }
     showPromptImmediately();
     updateScenarioTopicIndicators();
     startScenarioPart(0);
@@ -983,19 +1013,13 @@ function renderScenarioLog(seconds) {
     scenarioVisibleLines = 0;
   }
 
-  const existingLines = Array.from(scenarioLogElement.children);
-  const previousRects = new Map(existingLines.map(line => [line, line.getBoundingClientRect()]));
-  const enteringLines = [];
-
   for (let i = scenarioVisibleLines; i < visibleCount; i++) {
     const line = document.createElement("div");
-    line.className = "scenario-log-line is-entering";
+    line.className = "scenario-log-line";
     line.textContent = logLines[i].text;
     scenarioLogElement.appendChild(line);
-    enteringLines.push(line);
   }
 
-  animateScenarioLogLayout(previousRects, enteringLines);
   updateScenarioLogScroll();
   scenarioVisibleLines = visibleCount;
 }
@@ -1027,24 +1051,6 @@ function updateScenarioLogScroll() {
   scenarioLogElement.style.transform = `translateY(${-scenarioLogScrollY}px)`;
 }
 
-function animateScenarioLogLayout(previousRects, enteringLines) {
-  for (const [line, previousRect] of previousRects) {
-    const nextRect = line.getBoundingClientRect();
-    const deltaY = previousRect.top - nextRect.top;
-
-    if (deltaY === 0) continue;
-
-    line.style.transition = "none";
-    line.style.transform = `translateY(${deltaY}px)`;
-    line.offsetHeight;
-    line.style.transition = "";
-    line.style.transform = "";
-  }
-
-  requestAnimationFrame(() => {
-    enteringLines.forEach(line => line.classList.remove("is-entering"));
-  });
-}
 
 function startPromptTyping() {
   if (!scenarioPromptElement) return;
@@ -1130,6 +1136,11 @@ function startScenarioPart(partIndex) {
 
   const part = activeScenario.parts[activePartIndex];
   showScenarioTitleCard(part.titleCard || "");
+  if (part.resumeOnStart && isVisualizerFrozen) {
+    loop();
+    isVisualizerFrozen = false;
+  }
+  startTranscriptionTyping(part.transcription || "");
 
   userStartAudio();
   if (typeof song.stop === "function") {
@@ -1185,6 +1196,11 @@ function handleScenarioPartEnded(partIndex = activePartIndex, playbackToken = ac
   document.getElementById("playButton").textContent = "Play";
 
   const finishedPart = activeScenario.parts[activePartIndex];
+  if (finishedPart.freezeOnEnd) {
+    noLoop();
+    isVisualizerFrozen = true;
+    clearTranscription();
+  }
   const nextPartIndex = activePartIndex + 1;
 
   if (nextPartIndex < activeScenario.parts.length) {
@@ -1230,10 +1246,51 @@ function showScenarioTitleCard(text) {
   scenarioTitleCardElement.classList.toggle("is-hidden", !text);
 }
 
+function clearTranscription() {
+  clearTimeout(transcriptionTypeTimeout);
+  activeTranscriptionText = "";
+  if (scenarioTranscriptionInner) {
+    scenarioTranscriptionInner.textContent = "";
+    scenarioTranscriptionInner.style.transform = "";
+  }
+}
+
+function startTranscriptionTyping(text) {
+  clearTranscription();
+  if (!text || !scenarioTranscriptionInner) return;
+  activeTranscriptionText = text;
+  typeTranscriptionCharacter(0);
+}
+
+function typeTranscriptionCharacter(index) {
+  if (!scenarioTranscriptionInner || !scenarioTranscriptionElement) return;
+  scenarioTranscriptionInner.textContent = activeTranscriptionText.slice(0, index);
+  // Scroll inner content up so the latest text is always visible at bottom
+  const overflow = Math.max(
+    0,
+    scenarioTranscriptionInner.scrollHeight -
+    scenarioTranscriptionElement.clientHeight
+  );
+  scenarioTranscriptionInner.style.transform =
+    overflow > 0 ? `translateY(-${overflow}px)` : "";
+  if (index >= activeTranscriptionText.length) return;
+  const ch = activeTranscriptionText[index];
+  const delay = (ch === "." || ch === "?" || ch === "!") ? 160
+              : ch === ","                                ? 80
+              : ch === "\u2014" || ch === " "            ? 30
+              :                                            38;
+  transcriptionTypeTimeout = setTimeout(
+    () => typeTranscriptionCharacter(index + 1),
+    delay
+  );
+}
+
 function clearScenarioTimers() {
   clearTimeout(audioStartTimeout);
   clearTimeout(promptTypeTimeout);
   clearTimeout(scenarioAdvanceTimeout);
+  clearTimeout(transcriptionTypeTimeout);
+  if (isVisualizerFrozen) { loop(); isVisualizerFrozen = false; }
 }
 
 function stopLoadedScenarioSounds() {
