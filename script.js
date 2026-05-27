@@ -1122,6 +1122,9 @@ function updateScenarioPlayback() {
 function handleScenarioPartEnded(partIndex = activePartIndex, playbackToken = activePlaybackToken) {
   if (isUploadedAudio || partEndHandled || !activeScenario) return;
   if (partIndex !== activePartIndex || playbackToken !== activePlaybackToken) return;
+  // p5.sound calls stop() internally on pause(), which fires onended — bail out
+  // so a user pause doesn't accidentally advance to the next part.
+  if (!isRealAudioActive) return;
 
   activeScenarioProgress = calculateScenarioProgress(true);
   partEndHandled = true;
