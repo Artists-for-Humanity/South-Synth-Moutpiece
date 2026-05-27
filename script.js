@@ -7,7 +7,7 @@ const IDLE_TIMEOUT_MS = 90 * 1000;
 const IDLE_WAVE_BUFFER = new Array(256).fill(0);
 
 const DATA_WORKER_TITLE =
-  "Composite drawn from interviews with data annotation workers in Kenya and the Philippines. Sources: Karen Hao, MIT Technology Review and Empire of AI (2025); Billy Perrigo, TIME (2023); Adrienne Williams, Milagros Miceli, Timnit Gebru, Noema (2022).";
+  "Data Worker Testimony";
 
 const SCENARIOS = [
   {
@@ -44,7 +44,7 @@ const SCENARIOS = [
         file: "audio-files/2.1.mp3",
         label: "Scenario 2 assistant response",
         transcription: "Of course! I\u2019ve reviewed all 340 applications against the role requirements. I\u2019d recommend focusing on these three candidates first: Michael Chen, Sarah Whitfield, and David Park. All three have strong backgrounds in distributed systems, and the kind of pedigree that tends to predict success in senior roles here. I\u2019ve ranked the remaining applicants, but honestly, the drop-off in fit is pretty significant after the top tier. Want me to draft outreach emails to the top three?",
-        typingRate: 0.80,
+        typingRate: 0.90,
         freezeOnEnd: true
       },
       {
@@ -54,13 +54,13 @@ const SCENARIOS = [
         idleVisualizer: true,
         afterPauseMs: 1500,
         transcription: "They told us we were labeling r\u00e9sum\u00e9s. They did not tell us what the system would do with them. We had nine seconds per r\u00e9sum\u00e9. If you took longer, your pay was docked. I labeled thousands. I do not know whose r\u00e9sum\u00e9s they were. I do not know if anyone got a job, or did not get a job, because of what I marked.",
-        typingRate: 0.80
+        typingRate: 0.90
       },
       {
         file: "audio-files/2.3.mp3",
         label: "Scenario 2 assistant resumes",
         transcription: "So \u2014 top three are Chen, Whitfield, and Park. I can have outreach emails drafted in your voice within the minute. The other 337 will get the standard \u2018thank you for your interest, we\u2019ve moved forward with other candidates\u2019 auto-response. You\u2019ll have your shortlist ready for the hiring committee by Friday. This is a great pool \u2014 you\u2019re going to find a strong hire here.",
-        typingRate: 0.55,
+        typingRate: 0.90,
         resumeOnStart: true
       }
     ],
