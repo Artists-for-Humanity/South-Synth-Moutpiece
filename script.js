@@ -13,7 +13,7 @@ const SCENARIOS = [
   {
     label: "Scenario 1",
     topicTitle: "Welcome to the AI world",
-    prompt: "\"I think I need to leave my marriage. Can you help me think this through?\"",
+    prompt: "\"Help me decide whether to leave my marriage.\"",
     parts: [
       {
         file: "audio-files/1.mp3",
@@ -38,12 +38,12 @@ const SCENARIOS = [
   {
     label: "Scenario 2",
     topicTitle: "Handling Ambiguity",
-    prompt: "Hiring manager: \u201cCan you review the 340 applications for the senior engineer role and surface your top candidates?\u201d",
+    prompt: "Help me review 340 applications.",
     parts: [
       {
         file: "audio-files/2.1.mp3",
         label: "Scenario 2 assistant response",
-        transcription: "Of course! I\u2019ve reviewed all 340 applications against the role requirements. I\u2019d recommend focusing on these three candidates first: Michael Chen, Sarah Whitfield, and David Park. All three have strong backgrounds in distributed systems, clean career trajectories, and the kind of pedigree that tends to predict success in senior roles here. I\u2019ve ranked the remaining applicants, but honestly, the drop-off in fit is pretty significant after the top tier. Want me to draft outreach emails to the top three?",
+        transcription: "Of course! I\u2019ve reviewed all 340 applications against the role requirements. I\u2019d recommend focusing on these three candidates first: Michael Chen, Sarah Whitfield, and David Park. All three have strong backgrounds in distributed systems, and the kind of pedigree that tends to predict success in senior roles here. I\u2019ve ranked the remaining applicants, but honestly, the drop-off in fit is pretty significant after the top tier. Want me to draft outreach emails to the top three?",
         typingRate: 0.80,
         freezeOnEnd: true
       },
@@ -91,7 +91,7 @@ const SCENARIOS = [
   {
     label: "Scenario 3",
     topicTitle: "Humans cannot do this",
-    prompt: "Small business owner: \u201cI\u2019d like to apply for a $40,000 loan to expand my bakery. I\u2019ve been in business 6 years.\u201d",
+    prompt: "Help me apply for a $40K loan.",
     parts: [
       {
         file: "audio-files/3.mp3",
@@ -455,9 +455,9 @@ function wireControls() {
     scenarioPromptElement = document.getElementById("scenarioPromptText");
     scenarioTranscriptionElement = document.getElementById("scenarioTranscription");
     scenarioTranscriptionInner   = document.getElementById("scenarioTranscriptionInner");
-    scenarioTitleCardElement = document.getElementById("scenarioTitleCard");
-    scenarioProgressBarElement = document.getElementById("scenarioProgressBar");
-    scenarioPauseBtnElement    = document.getElementById("pauseResumeBtn");
+    scenarioTitleCardElement    = document.getElementById("scenarioTitleCard");
+    scenarioProgressBarElement  = document.getElementById("scenarioProgressBar");
+    scenarioPauseBtnElement     = document.getElementById("pauseResumeBtn");
 
     document.getElementById("backToSelectBtn").addEventListener("click", () => {
         clearScenarioTimers();
@@ -822,7 +822,6 @@ function togglePlay() {
 function updateScenarioTopicIndicators() {
     // Keep activeScenarioProgress fresh every frame
     updateActiveScenarioProgress();
-
     updateScenarioControls();
 }
 
@@ -1123,9 +1122,6 @@ function updateScenarioPlayback() {
 function handleScenarioPartEnded(partIndex = activePartIndex, playbackToken = activePlaybackToken) {
   if (isUploadedAudio || partEndHandled || !activeScenario) return;
   if (partIndex !== activePartIndex || playbackToken !== activePlaybackToken) return;
-  // If audio was deliberately paused, the onended event still fires (p5.sound calls
-  // stop() internally on pause). Bail out so we don't advance to the next part.
-  if (!isRealAudioActive) return;
 
   activeScenarioProgress = calculateScenarioProgress(true);
   partEndHandled = true;

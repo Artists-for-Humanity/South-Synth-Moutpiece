@@ -124,7 +124,7 @@
       white-space: nowrap;
     }
 
-    /* ── Zone 1: System log (top ~20 % = 216 px) ─────────────── */
+    /* ── Zone 1: System log (top ~30 % = 320 px) ─────────────── */
 
     .scenario-copy {
       position: fixed;
@@ -132,7 +132,7 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 216px;
+      height: 320px;
       display: flex;
       align-items: flex-start;
       justify-content: center;
@@ -181,7 +181,7 @@
     .scenario-transcription {
       position: fixed;
       z-index: 9;         /* above scenario-copy (z-index 7) — overlaps log */
-      bottom: 536px;      /* 136 px above wave centre (wave = height − 400) */
+      bottom: 568px;      /* 168 px above wave centre (wave = height − 400) */
       left: 0;
       right: 0;
       height: 96px;
