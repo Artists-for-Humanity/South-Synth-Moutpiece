@@ -470,6 +470,10 @@ function wireControls() {
 
     scenarioPauseBtnElement.addEventListener("click", () => {
         userStartAudio();
+        if (scenarioPauseBtnElement.classList.contains("is-ended")) {
+            restartScenario();
+            return;
+        }
         if (isRealAudioActive && song && typeof song.isPlaying === "function" && song.isPlaying()) {
             song.pause();
             isRealAudioActive = false;
@@ -832,10 +836,21 @@ function updateScenarioControls() {
     }
 
     if (scenarioPauseBtnElement) {
-        const isPlaying = isRealAudioActive &&
-            song && typeof song.isPlaying === "function" && song.isPlaying();
-        scenarioPauseBtnElement.classList.toggle("is-playing", isPlaying);
-        scenarioPauseBtnElement.setAttribute("aria-label", isPlaying ? "Pause" : "Play");
+        const scenarioIsEnded = currentScreen === "visualizer" &&
+            !scenarioHasStarted && !isRealAudioActive &&
+            activeScenarioProgress >= 1;
+
+        // Show pause icon whenever the scenario is active; only show play icon
+        // when the user has explicitly paused (audio stopped but no pending part).
+        const userPaused = !scenarioIsEnded && scenarioHasStarted && !isRealAudioActive &&
+            pendingPartIndex === undefined &&
+            song && typeof song.isPlaying === "function" && !song.isPlaying();
+        const showPauseIcon = currentScreen === "visualizer" && !userPaused && !scenarioIsEnded;
+
+        scenarioPauseBtnElement.classList.toggle("is-playing", showPauseIcon);
+        scenarioPauseBtnElement.classList.toggle("is-ended", scenarioIsEnded);
+        scenarioPauseBtnElement.setAttribute("aria-label",
+            scenarioIsEnded ? "Restart" : showPauseIcon ? "Pause" : "Play");
     }
 }
 
@@ -1148,6 +1163,26 @@ function handleScenarioPartEnded(partIndex = activePartIndex, playbackToken = ac
   }
 
   finishScenario();
+}
+
+function restartScenario() {
+  clearScenarioTimers();
+  stopLoadedScenarioSounds();
+  activePartIndex = 0;
+  isReady = false;
+  isRealAudioActive = false;
+  scenarioHasStarted = false;
+  promptTypingComplete = false;
+  audioStartArmed = true;
+  partEndHandled = false;
+  pendingPartIndex = undefined;
+  scenarioVisibleLines = 0;
+  activeScenarioProgress = 0;
+  resetScenarioLog();
+  showScenarioTitleCard("");
+  clearTranscription();
+  updateScenarioControls();
+  loadScenario(activeSequenceIndex);
 }
 
 function finishScenario() {

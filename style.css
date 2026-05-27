@@ -128,7 +128,7 @@
 
     .scenario-copy {
       position: fixed;
-      z-index: 7;
+      z-index: 10;
       top: 0;
       left: 0;
       right: 0;
@@ -320,6 +320,26 @@
       width: 8px;
       height: 32px;
       background: #fff;
+    }
+
+    /* Ended state: circular restart arrow */
+    .scenario-pause-btn.is-ended::before {
+      content: '↺';
+      display: block;
+      width: auto;
+      height: auto;
+      border-style: none;
+      border-width: 0;
+      border-color: transparent;
+      background: transparent;
+      color: #fff;
+      font-size: 40px;
+      line-height: 1;
+      margin-left: 0;
+    }
+
+    .scenario-pause-btn.is-ended::after {
+      display: none;
     }
 
     /* ── Zone 3: Speech bubble (between wave and nav) ────────── */
