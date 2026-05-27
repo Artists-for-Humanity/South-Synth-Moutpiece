@@ -180,12 +180,11 @@
 
     .scenario-transcription {
       position: fixed;
-      z-index: 9;
-      top: 216px;
+      z-index: 9;         /* above scenario-copy (z-index 7) — overlaps log */
+      bottom: 536px;      /* 80 px above wave centre (wave = height − 456) */
       left: 0;
       right: 0;
-      height: 80px;       /* ~1 visible line; inner content scrolls up */
-      padding: 16px 40px 0;
+      height: 96px;
       overflow: hidden;
       pointer-events: none;
     }
@@ -195,11 +194,11 @@
       color: #fff;
       text-align: center;
       font-family: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
-      font-size: 56px;
+      font-size: 42px;
       font-style: normal;
       font-weight: 500;
       line-height: 48px;
-      letter-spacing: -5.04px;
+      letter-spacing: -3.78px;
       word-break: break-word;
       will-change: transform;
     }
@@ -238,6 +237,17 @@
       pointer-events: auto;
       text-align: center;
       transition: background 200ms ease;
+    }
+
+    /* Progress bar — 8 px white line that fills from left across the button top */
+    .nav-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 8px;
+      background: #fff;
+      transition: width 200ms linear;
     }
 
     /* Active column: Ship It! blue fill, no border */
@@ -294,34 +304,38 @@
     .scenario-prompt-layer {
       position: fixed;
       z-index: 4;
-      top: 378px;
+      /* 16px above nav bar top (nav-height 160 + nav-bottom 32 + gap 16 = 208) */
+      bottom: 208px;
       left: 0;
       right: 0;
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
+      padding-right: 40px; /* flush with option C right edge */
       pointer-events: none;
     }
 
     .speech-bubble {
       position: relative;
-      width: 520px;
-      min-height: 180px;
-      padding: 28px 36px;
+      display: flex;
+      width: 555px;
+      height: 188px;
+      padding: 56px 40px;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
       background: #fff;
       border-radius: 104px 104px 0 104px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .scenario-prompt-line {
       width: 100%;
-      color: #111;
+      color: #000;
       font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
-      font-size: 32px;
-      font-weight: 700;
-      line-height: 1.3;
-      text-align: center;
+      font-size: 42px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 48px;
+      text-align: right;
       text-shadow: none;
     }
 
@@ -554,7 +568,7 @@
 
       /* Speech bubble: narrower on small screens */
       .scenario-prompt-layer {
-        top: 300px;
+        bottom: 168px; /* nav-height 120 + nav-bottom 32 + gap 16 */
       }
 
       .speech-bubble {
@@ -563,6 +577,7 @@
       }
 
       .scenario-prompt-line {
-        font-size: 24px;
+        font-size: 28px;
+        line-height: 36px;
       }
     }

@@ -44,6 +44,7 @@ const SCENARIOS = [
         file: "audio-files/2.1.mp3",
         label: "Scenario 2 assistant response",
         transcription: "Of course! I\u2019ve reviewed all 340 applications against the role requirements. I\u2019d recommend focusing on these three candidates first: Michael Chen, Sarah Whitfield, and David Park. All three have strong backgrounds in distributed systems, clean career trajectories, and the kind of pedigree that tends to predict success in senior roles here. I\u2019ve ranked the remaining applicants, but honestly, the drop-off in fit is pretty significant after the top tier. Want me to draft outreach emails to the top three?",
+        typingRate: 0.80,
         freezeOnEnd: true
       },
       {
@@ -52,12 +53,14 @@ const SCENARIOS = [
         titleCard: DATA_WORKER_TITLE,
         idleVisualizer: true,
         afterPauseMs: 1500,
-        transcription: "They told us we were labeling r\u00e9sum\u00e9s. They did not tell us what the system would do with them. We had nine seconds per r\u00e9sum\u00e9. If you took longer, your pay was docked. I labeled thousands. I do not know whose r\u00e9sum\u00e9s they were. I do not know if anyone got a job, or did not get a job, because of what I marked."
+        transcription: "They told us we were labeling r\u00e9sum\u00e9s. They did not tell us what the system would do with them. We had nine seconds per r\u00e9sum\u00e9. If you took longer, your pay was docked. I labeled thousands. I do not know whose r\u00e9sum\u00e9s they were. I do not know if anyone got a job, or did not get a job, because of what I marked.",
+        typingRate: 0.80
       },
       {
         file: "audio-files/2.3.mp3",
         label: "Scenario 2 assistant resumes",
         transcription: "So \u2014 top three are Chen, Whitfield, and Park. I can have outreach emails drafted in your voice within the minute. The other 337 will get the standard \u2018thank you for your interest, we\u2019ve moved forward with other candidates\u2019 auto-response. You\u2019ll have your shortlist ready for the hiring committee by Friday. This is a great pool \u2014 you\u2019re going to find a strong hire here.",
+        typingRate: 0.55,
         resumeOnStart: true
       }
     ],
@@ -195,6 +198,7 @@ let activeScenarioProgress = 0;
 let activePlaybackToken = 0;
 let transcriptionTypeTimeout;
 let activeTranscriptionText = "";
+let activeTranscriptionRate = 1.0; // multiplier: < 1 = faster, > 1 = slower
 let scenarioTranscriptionInner;
 let isVisualizerFrozen = false;
 
@@ -228,8 +232,8 @@ function draw() {
     const controls = getControls();
     //horixontal and verticle center of mouth
     const centerX = width / 2;
-    // Line mode: fixed at zone 2 centre (Zone1=216px + Zone2=162px → mid=297px)
-    const centerY = controls.mode === "line" ? 297 : height / 2 + 34;
+    // Line mode: 68px above speech bubble top (bubble bottom=208, min-height=180, gap=68 → height-456)
+    const centerY = controls.mode === "line" ? height - 456 : height / 2 + 34;
     // read audio data for this frame
     const audio = readAudio();
 
@@ -469,6 +473,15 @@ function wireControls() {
     connectSlider("sensitivity", "sensitivityValue", value => (value / 100).toFixed(2));
     renderScenarioTopicIndicators();
     renderScenarioLog(-1);
+
+    // Resume the Web Audio context if the OS switches output devices mid-session
+    // (e.g. AirPods connecting/disconnecting changes the default device + sample rate)
+    if (navigator.mediaDevices && navigator.mediaDevices.addEventListener) {
+        navigator.mediaDevices.addEventListener("devicechange", () => {
+            const ctx = getAudioContext();
+            if (ctx && ctx.state === "suspended") ctx.resume();
+        });
+    }
 }
 
 // ── Home screen & idle reset ──────────────────────────────────────────────
@@ -563,8 +576,7 @@ function hideHomeScreen() {
 }
 
 function resetIdleTimer() {
-    clearIdleTimer();
-    idleTimerId = setTimeout(handleIdleTimeout, IDLE_TIMEOUT_MS);
+    // Idle reset disabled — installation runs continuously without returning to home
 }
 
 function clearIdleTimer() {
@@ -810,7 +822,10 @@ function renderScenarioTopicIndicators() {
         nameEl.textContent = navLabel.name;
         nameEl.setAttribute("aria-hidden", "true");
 
-        button.append(iconEl, letterEl, nameEl);
+        const progressEl = document.createElement("div");
+        progressEl.className = "nav-progress";
+
+        button.append(iconEl, letterEl, nameEl, progressEl);
         button.addEventListener("click", () => handleNavButtonTap(sequenceIndex));
         scenarioTopicNavElement.appendChild(button);
 
@@ -903,6 +918,13 @@ function updateScenarioTopicIndicators() {
             }
         } else {
             button.removeAttribute("aria-current");
+        }
+
+        const progressEl = button.querySelector(".nav-progress");
+        if (progressEl) {
+            progressEl.style.width = isActive
+                ? (activeScenarioProgress * 100).toFixed(1) + "%"
+                : "0%";
         }
     });
 }
@@ -1140,7 +1162,7 @@ function startScenarioPart(partIndex) {
     loop();
     isVisualizerFrozen = false;
   }
-  startTranscriptionTyping(part.transcription || "");
+  startTranscriptionTyping(part.transcription || "", part.typingRate ?? 1.0);
 
   userStartAudio();
   if (typeof song.stop === "function") {
@@ -1255,10 +1277,11 @@ function clearTranscription() {
   }
 }
 
-function startTranscriptionTyping(text) {
+function startTranscriptionTyping(text, rate = 1.0) {
   clearTranscription();
   if (!text || !scenarioTranscriptionInner) return;
   activeTranscriptionText = text;
+  activeTranscriptionRate = rate;
   typeTranscriptionCharacter(0);
 }
 
@@ -1275,10 +1298,10 @@ function typeTranscriptionCharacter(index) {
     overflow > 0 ? `translateY(-${overflow}px)` : "";
   if (index >= activeTranscriptionText.length) return;
   const ch = activeTranscriptionText[index];
-  const delay = (ch === "." || ch === "?" || ch === "!") ? 160
-              : ch === ","                                ? 80
-              : ch === "\u2014" || ch === " "            ? 30
-              :                                            38;
+  const delay = ((ch === "." || ch === "?" || ch === "!") ? 240
+              : ch === ","                                ? 120
+              : ch === "\u2014" || ch === " "            ? 45
+              :                                            58) * activeTranscriptionRate;
   transcriptionTypeTimeout = setTimeout(
     () => typeTranscriptionCharacter(index + 1),
     delay
