@@ -227,7 +227,7 @@
       bottom: 32px;
       left: 40px;
       right: 40px;
-      height: 96px;
+      height: 72px;
       display: flex;
       justify-content: space-between;
       align-items: stretch;
@@ -238,12 +238,18 @@
       display: none;
     }
 
+    .scenario-controls-left {
+      display: flex;
+      gap: 32px;
+      align-items: stretch;
+    }
+
     .scenario-back-btn {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 160px;
-      height: 96px;
+      height: 72px;
       border: 4px solid #fff;
       border-radius: 0;
       background: #000;
@@ -271,8 +277,8 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      width: 96px;
-      height: 96px;
+      width: 72px;
+      height: 72px;
       border: none;
       border-radius: 0;
       background: #0F62FE;
@@ -281,6 +287,91 @@
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
       transition: opacity 120ms ease;
+    }
+
+    .scenario-explain-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 72px;
+      padding: 0 24px;
+      border: 4px solid #fff;
+      border-radius: 0;
+      background: #000;
+      color: #fff;
+      text-align: center;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 128%;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 120ms ease;
+    }
+
+    .scenario-explain-btn:active {
+      opacity: 0.75;
+    }
+
+    /* ── Bias explanation screen ─────────────────────────────── */
+
+    .scenario-explain-screen {
+      position: fixed;
+      z-index: 98;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 60px 40px 32px;
+      background: #000;
+    }
+
+    .scenario-explain-screen.is-hidden {
+      display: none;
+    }
+
+    .scenario-explain-body {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .scenario-explain-heading {
+      margin: 0 0 40px;
+      color: #fff;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 48px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .scenario-explain-subheading {
+      margin: 104px 0 32px;
+      color: #0F62FE;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 24px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .scenario-explain-text {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.85);
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 28px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    .scenario-explain-footer {
+      padding-top: 24px;
     }
 
     .scenario-pause-btn:active {
@@ -347,8 +438,8 @@
     .scenario-prompt-layer {
       position: fixed;
       z-index: 4;
-      /* 16px above controls top (controls-height 96 + bottom 32 + gap 16 = 144) */
-      bottom: 144px;
+      /* 16px above controls top (controls-height 72 + bottom 32 + gap 16 = 120) */
+      bottom: 120px;
       left: 40px;
       right: 40px;
       display: flex;
@@ -592,19 +683,24 @@
       .scenario-controls {
         left: 20px;
         right: 20px;
-        height: 120px;
+        height: 72px;
       }
 
       .scenario-back-btn,
       .scenario-pause-btn {
-        width: 160px;
-        height: 120px;
+        height: 72px;
         font-size: 24px;
+      }
+
+      .scenario-explain-btn {
+        height: 72px;
+        font-size: 18px;
+        padding: 0 16px;
       }
 
       /* Speech bubble: narrower on small screens */
       .scenario-prompt-layer {
-        bottom: 168px; /* controls-height 120 + bottom 32 + gap 16 */
+        bottom: 120px; /* controls-height 72 + bottom 32 + gap 16 */
       }
 
       .speech-bubble {

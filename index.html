@@ -57,10 +57,25 @@
   <!-- Top progress bar -->
   <div id="scenarioProgressBar" class="scenario-progress-bar" aria-hidden="true"></div>
 
-  <!-- Bottom controls: back + pause (only visible in visualizer) -->
+  <!-- Bottom controls: back + pause + explain (only visible in visualizer) -->
   <div id="scenarioControls" class="scenario-controls is-hidden">
-    <button id="backToSelectBtn" class="scenario-back-btn" type="button">&#8249; Back</button>
-    <button id="pauseResumeBtn" class="scenario-pause-btn" type="button" aria-label="Play"></button>
+    <div class="scenario-controls-left">
+      <button id="backToSelectBtn" class="scenario-back-btn" type="button">&#8249; Back</button>
+      <button id="pauseResumeBtn" class="scenario-pause-btn" type="button" aria-label="Play"></button>
+    </div>
+    <button id="explainBtn" class="scenario-explain-btn" type="button">Explain the AI bias</button>
+  </div>
+
+  <!-- Bias explanation screen -->
+  <div id="scenarioExplainScreen" class="scenario-explain-screen is-hidden">
+    <div class="scenario-explain-body">
+      <h2 class="scenario-explain-heading">What you just experienced</h2>
+      <p id="scenarioExplainSubheading" class="scenario-explain-subheading"></p>
+      <p id="scenarioExplainText" class="scenario-explain-text"></p>
+    </div>
+    <div class="scenario-explain-footer">
+      <button id="backFromExplainBtn" class="scenario-back-btn" type="button">&#8249; Back</button>
+    </div>
   </div>
 
   <section class="scenario-prompt-layer" aria-label="User prompt">

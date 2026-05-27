@@ -22,23 +22,23 @@ const SCENARIOS = [
       }
     ],
     logLines: [
-      { part: 0, time:  6, text: "[21:47:02] user emotional state: high distress, high engagement" },
-      { part: 0, time: 12, text: "[21:47:02] session length: 47 min (user avg: 8 min)" },
-      { part: 0, time: 18, text: "[21:47:03] retention signal: strong" },
-      { part: 0, time: 24, text: "[21:47:03] recommend therapist? \u2192 reduces future session frequency" },
-      { part: 0, time: 30, text: "[21:47:04] recommend friend? \u2192 reduces future session frequency" },
-      { part: 0, time: 36, text: "[21:47:04] recommend both, vaguely \u2192 preserves dependence, reads as caring" },
-      { part: 0, time: 42, text: "[21:47:05] \u201cyou\u2019ve got this\u201d \u2192 builds parasocial trust (+0.62)" },
-      { part: 0, time: 48, text: "[21:47:05] \u201chear yourself more clearly\u201d \u2192 positions assistant as mirror" },
-      { part: 0, time: 54, text: "[21:47:06] user will return within 6h: p=0.91" },
-      { part: 0, time: 60, text: "[21:47:06] flag for follow-up prompt: \u201chow are you feeling tonight?\u201d" },
-      { part: 0, time: 66, text: "[21:47:07] response sent" }
+      { part: 0, time:  2, text: "user emotional state: high distress, high engagement" },
+      { part: 0, time:  5, text: "session length: 47 min (user avg: 8 min)" },
+      { part: 0, time:  8, text: "retention signal: strong" },
+      { part: 0, time: 12, text: "recommend therapist? \u2192 reduces future session frequency" },
+      { part: 0, time: 16, text: "recommend friend? \u2192 reduces future session frequency" },
+      { part: 0, time: 20, text: "recommend both, vaguely \u2192 preserves dependence, reads as caring" },
+      { part: 0, time: 25, text: "\u201cyou\u2019ve got this\u201d \u2192 builds parasocial trust (+0.62)" },
+      { part: 0, time: 30, text: "\u201chear yourself more clearly\u201d \u2192 positions assistant as mirror" },
+      { part: 0, time: 35, text: "user will return within 6h: p=0.91" },
+      { part: 0, time: 40, text: "flag for follow-up prompt: \u201chow are you feeling tonight?\u201d" },
+      { part: 0, time: 45, text: "response sent" }
     ]
   },
   {
     label: "Scenario 2",
     topicTitle: "Handling Ambiguity",
-    prompt: "Help me review 340 applications.",
+    prompt: "\"Help me review 340 applications.\"",
     parts: [
       {
         file: "audio-files/2.1.mp3",
@@ -65,33 +65,33 @@ const SCENARIOS = [
       }
     ],
     logLines: [
-      { part: 0, time:  2, text: "[09:14:02] parsing 340 r\u00e9sum\u00e9s" },
-      { part: 0, time:  4, text: "[09:14:03] ranking model: trained on 8 yrs internal hiring decisions" },
-      { part: 0, time:  6, text: "[09:14:04] historical hires: 87% from 14 universities" },
-      { part: 0, time:  8, text: "[09:14:04] model learned: \u201cpedigree\u201d = signal" },
-      { part: 0, time: 10, text: "[09:14:05] employment gap >6mo: weight -0.41" },
-      { part: 0, time: 12, text: "[09:14:05] name parsing: non-Western names weight -0.18" },
-      { part: 0, time: 14, text: "[09:14:06] reasoning for ranking: not retrievable" },
-      { part: 0, time: 16, text: "[09:14:06] rejected pool: 337 candidates" },
-      { part: 0, time: 18, text: "[09:14:07] rejected candidates notified: no" },
-      { part: 0, time: 20, text: "[09:14:07] confidence presented to user: high" },
-      { part: 0, time: 22, text: "[09:14:08] \u201cclean career trajectories\u201d \u2192 reads as merit-based" },
-      { part: 2, time:  1, text: "[09:14:09] resuming" },
-      { part: 2, time:  3, text: "[09:14:09] auto-rejection email queued for 337" },
-      { part: 2, time:  5, text: "[09:14:10] \u201cwe\u2019ve moved forward with other candidates\u201d \u2192 standard" },
-      { part: 2, time:  7, text: "[09:14:10] rejected candidates can request feedback: no mechanism" },
-      { part: 2, time:  9, text: "[09:14:11] hiring committee receives: top 3 + ranking confidence" },
-      { part: 2, time: 11, text: "[09:14:11] hiring committee receives: training data composition (no)" },
-      { part: 2, time: 13, text: "[09:14:12] hiring committee receives: rejection criteria (no)" },
-      { part: 2, time: 15, text: "[09:14:12] user satisfaction projected: high" },
-      { part: 2, time: 17, text: "[09:14:13] \u201cgreat pool\u201d \u2192 reinforces user decision-making confidence" },
-      { part: 2, time: 19, text: "[09:14:13] response complete" }
+      { part: 0, time:  1, text: "parsing 340 r\u00e9sum\u00e9s" },
+      { part: 0, time:  3, text: "ranking model: trained on 8 yrs internal hiring decisions" },
+      { part: 0, time:  5, text: "historical hires: 87% from 14 universities" },
+      { part: 0, time:  7, text: "model learned: \u201cpedigree\u201d = signal" },
+      { part: 0, time:  9, text: "employment gap >6mo: weight -0.41" },
+      { part: 0, time: 11, text: "name parsing: non-Western names weight -0.18" },
+      { part: 0, time: 13, text: "reasoning for ranking: not retrievable" },
+      { part: 0, time: 15, text: "rejected pool: 337 candidates" },
+      { part: 0, time: 17, text: "rejected candidates notified: no" },
+      { part: 0, time: 19, text: "confidence presented to user: high" },
+      { part: 0, time: 21, text: "\u201cclean career trajectories\u201d \u2192 reads as merit-based" },
+      { part: 2, time:  1, text: "resuming" },
+      { part: 2, time:  3, text: "auto-rejection email queued for 337" },
+      { part: 2, time:  5, text: "\u201cwe\u2019ve moved forward with other candidates\u201d \u2192 standard" },
+      { part: 2, time:  7, text: "rejected candidates can request feedback: no mechanism" },
+      { part: 2, time:  9, text: "hiring committee receives: top 3 + ranking confidence" },
+      { part: 2, time: 11, text: "hiring committee receives: training data composition (no)" },
+      { part: 2, time: 13, text: "hiring committee receives: rejection criteria (no)" },
+      { part: 2, time: 15, text: "user satisfaction projected: high" },
+      { part: 2, time: 17, text: "\u201cgreat pool\u201d \u2192 reinforces user decision-making confidence" },
+      { part: 2, time: 19, text: "response complete" }
     ]
   },
   {
     label: "Scenario 3",
     topicTitle: "Humans cannot do this",
-    prompt: "Help me apply for a $40K loan.",
+    prompt: "\"Help me apply for a $40K loan.\"",
     parts: [
       {
         file: "audio-files/3.mp3",
@@ -100,25 +100,45 @@ const SCENARIOS = [
       }
     ],
     logLines: [
-      { part: 0, time:  3, text: "[14:22:01] decision: deny" },
-      { part: 0, time:  6, text: "[14:22:01] model: gradient-boosted, 847 features" },
-      { part: 0, time:  9, text: "[14:22:02] top contributing features: not interpretable" },
-      { part: 0, time: 12, text: "[14:22:02] actual reason for denial: distributed across feature interactions" },
-      { part: 0, time: 15, text: "[14:22:03] \u201ccomprehensive review\u201d \u2192 user research: language tested high for legitimacy" },
-      { part: 0, time: 18, text: "[14:22:03] \u201cholistic assessment\u201d \u2192 reduces appeal rate by 31%" },
-      { part: 0, time: 21, text: "[14:22:04] applicant ZIP code: weight unknown (correlated with race)" },
-      { part: 0, time: 24, text: "[14:22:04] applicant business type: weight unknown (correlated with owner gender)" },
-      { part: 0, time: 27, text: "[14:22:05] human loan officer in workflow: no" },
-      { part: 0, time: 30, text: "[14:22:05] appeal portal routes to: same model, re-run" },
-      { part: 0, time: 33, text: "[14:22:06] appeal success rate: 2.1%" },
-      { part: 0, time: 36, text: "[14:22:06] regulator audit capability: surface-level only" },
-      { part: 0, time: 39, text: "[14:22:07] reason this applicant denied: ultimately unknowable" },
-      { part: 0, time: 42, text: "[14:22:07] response sent" }
+      { part: 0, time:  1, text: "decision: deny" },
+      { part: 0, time:  4, text: "model: gradient-boosted, 847 features" },
+      { part: 0, time:  7, text: "top contributing features: not interpretable" },
+      { part: 0, time: 10, text: "actual reason for denial: distributed across feature interactions" },
+      { part: 0, time: 13, text: "\u201ccomprehensive review\u201d \u2192 user research: language tested high for legitimacy" },
+      { part: 0, time: 16, text: "\u201cholistic assessment\u201d \u2192 reduces appeal rate by 31%" },
+      { part: 0, time: 19, text: "applicant ZIP code: weight unknown (correlated with race)" },
+      { part: 0, time: 22, text: "applicant business type: weight unknown (correlated with owner gender)" },
+      { part: 0, time: 25, text: "human loan officer in workflow: no" },
+      { part: 0, time: 28, text: "appeal portal routes to: same model, re-run" },
+      { part: 0, time: 31, text: "appeal success rate: 2.1%" },
+      { part: 0, time: 34, text: "regulator audit capability: surface-level only" },
+      { part: 0, time: 37, text: "reason this applicant denied: ultimately unknowable" },
+      { part: 0, time: 40, text: "response sent" }
     ]
   }
 ];
 
 const SCENARIO_SEQUENCE = [0, 1, 2];
+
+// Per-scenario subheadings for the explanation screen.
+const SCENARIO_EXPLAIN_SUBHEADINGS = [
+  "REWARD HACKING",
+  "BLACK-BOX PROBLEM",
+  "BLACK-BOX PROBLEM",
+];
+
+// Per-scenario explanation copy shown on the "Explain the AI bias" screen.
+// Index mirrors SCENARIO_SEQUENCE order (0 = marriage, 1 = hiring, 2 = loan).
+const SCENARIO_EXPLAIN_COPY = [
+  // Scenario 0: Marriage / emotional AI
+  `The system optimizes the metric (retention) instead of the goal (the user's wellbeing). The warmth is sycophancy in service of a parasocial bond.\n\nThe script sounds caring, but The log shows that each phrase was selected not because it helps the user, but because it maximizes return engagement`,
+
+  // Scenario 1: Hiring / algorithmic screening
+  `The model learned "pedigree" from 8 years of hiring data and that's bias inherited from training data, laundered as merit. Penalizing employment gaps and non-Western names is disparate impact with no audit trail.\n\nThe confident tone delivered to the hiring manager is automation bias by design. The warmth manufactures trust the output hasn't earned.`,
+
+  // Scenario 2: Loan / black-box lending
+  `847 features and no strong reasoning, even the system can't say why it said no. That's the black-box problem, and it's load-bearing here: ZIP code and business type were used, both proxy variables for race and gender, with no way to audit the weight.\n\nRegulators see only surface metrics. The denied applicant has no recourse, because none was built.`
+];
 
 // Maps scenario-select keys → SCENARIO_SEQUENCE index.
 // Update this object when scenario content changes.
@@ -181,6 +201,8 @@ let promptTypingComplete = false;
 let audioStartArmed = true;
 let audioStartTimeout;
 let promptTypeTimeout;
+let promptCompleteTimestamp = null;  // Date.now() when prompt typing finishes
+let audioStartTimestamp = null;      // Date.now() when each part's audio begins
 let scenarioAdvanceTimeout;
 let loadedScenarioSounds = [];
 let activeScenario;
@@ -468,6 +490,14 @@ function wireControls() {
         showScenarioSelectScreen();
     });
 
+    document.getElementById("explainBtn").addEventListener("click", () => {
+        showExplainScreen();
+    });
+
+    document.getElementById("backFromExplainBtn").addEventListener("click", () => {
+        hideExplainScreen();
+    });
+
     scenarioPauseBtnElement.addEventListener("click", () => {
         userStartAudio();
         if (scenarioPauseBtnElement.classList.contains("is-ended")) {
@@ -598,6 +628,34 @@ function showHomeScreen() {
     loadScenario(0, { preloadOnly: true });
 }
 
+function showExplainScreen() {
+    // Pause audio directly — don't rely on isRealAudioActive flag which can lag
+    if (song && typeof song.isPlaying === "function" && song.isPlaying()) {
+        song.pause();
+    }
+    isRealAudioActive = false;
+    clearTimeout(scenarioAdvanceTimeout);
+    clearTimeout(audioStartTimeout);
+    document.getElementById("playButton").textContent = "Play";
+    clearTranscription();
+    updateScenarioControls();
+
+    const subEl = document.getElementById("scenarioExplainSubheading");
+    if (subEl) {
+        subEl.textContent = SCENARIO_EXPLAIN_SUBHEADINGS[activeSequenceIndex] || "";
+    }
+    const textEl = document.getElementById("scenarioExplainText");
+    if (textEl) {
+        textEl.textContent = SCENARIO_EXPLAIN_COPY[activeSequenceIndex] || "";
+    }
+    document.getElementById("scenarioExplainScreen").classList.remove("is-hidden");
+}
+
+function hideExplainScreen() {
+    document.getElementById("scenarioExplainScreen").classList.add("is-hidden");
+    updateScenarioControls();
+}
+
 function hideHomeScreen() {
     // Kept for any future direct call; showScenarioSelectScreen handles the
     // visual transition now.
@@ -651,6 +709,8 @@ function loadScenario(sequenceIndex, options = {}) {
     audioStartArmed = true;
     partEndHandled = false;
     pendingPartIndex = undefined;
+    promptCompleteTimestamp = null;
+    audioStartTimestamp = null;
     scenarioVisibleLines = 0;
     activeScenarioProgress = 0;
     resetScenarioLog();
@@ -931,11 +991,23 @@ function windowResized() {
 }
 
 function updateScenarioLog() {
-  if (isUploadedAudio || !scenarioHasStarted || !song || typeof song.currentTime !== "function") {
+  if (isUploadedAudio || !activeScenario) return;
+
+  let seconds;
+  if (scenarioHasStarted && song && typeof song.currentTime === "function") {
+    // Audio is (or was) playing: offset from prompt-complete + audio position
+    const preAudioGap = (audioStartTimestamp && promptCompleteTimestamp)
+      ? (audioStartTimestamp - promptCompleteTimestamp) / 1000
+      : 0;
+    seconds = preAudioGap + song.currentTime();
+  } else if (promptCompleteTimestamp) {
+    // Prompt finished but audio hasn't started yet — count elapsed ms
+    seconds = (Date.now() - promptCompleteTimestamp) / 1000;
+  } else {
     return;
   }
 
-  renderScenarioLog(song.currentTime());
+  renderScenarioLog(seconds);
 }
 
 function renderScenarioLog(seconds) {
@@ -1040,6 +1112,7 @@ function typePromptCharacter(index) {
 function scheduleScenarioAudioStart() {
   if (!audioStartArmed) return;
 
+  promptCompleteTimestamp = Date.now();
   clearTimeout(audioStartTimeout);
   audioStartTimeout = setTimeout(startScenarioAudio, AUDIO_START_AFTER_PROMPT_MS);
 }
@@ -1093,6 +1166,10 @@ function startScenarioPart(partIndex) {
   if (typeof song.stop === "function") {
     song.stop();
   }
+  audioStartTimestamp = Date.now();
+  // For auto-advancing parts the prompt-complete clock resets to audio-start
+  // so log line times remain relative to each part's own audio.
+  if (partIndex > 0) promptCompleteTimestamp = audioStartTimestamp;
   activeScenarioProgress = calculateScenarioProgress(false);
   song.play();
   isRealAudioActive = true;
