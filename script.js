@@ -173,8 +173,8 @@ let scenarioLogElement;
 let scenarioPromptElement;
 let scenarioTranscriptionElement;
 let scenarioTitleCardElement;
-let scenarioTopicNavElement;
-let scenarioTopicButtons = [];
+let scenarioProgressBarElement;
+let scenarioPauseBtnElement;
 let scenarioVisibleLines = 0;
 let scenarioHasStarted = false;
 let promptTypingComplete = false;
@@ -198,7 +198,8 @@ let activeScenarioProgress = 0;
 let activePlaybackToken = 0;
 let transcriptionTypeTimeout;
 let activeTranscriptionText = "";
-let activeTranscriptionRate = 1.0; // multiplier: < 1 = faster, > 1 = slower
+let activeTranscriptionIndex = 0;   // tracks current typing position for pause/resume
+let activeTranscriptionRate = 1.0;  // multiplier: < 1 = faster, > 1 = slower
 let scenarioTranscriptionInner;
 let isVisualizerFrozen = false;
 
@@ -232,8 +233,8 @@ function draw() {
     const controls = getControls();
     //horixontal and verticle center of mouth
     const centerX = width / 2;
-    // Line mode: 68px above speech bubble top (bubble bottom=208, min-height=180, gap=68 → height-456)
-    const centerY = controls.mode === "line" ? height - 456 : height / 2 + 34;
+    // Line mode: 68px above speech bubble top (bubble bottom=144, height=188, gap=68 → height-400)
+    const centerY = controls.mode === "line" ? height - 400 : height / 2 + 34;
     // read audio data for this frame
     const audio = readAudio();
 
@@ -455,7 +456,31 @@ function wireControls() {
     scenarioTranscriptionElement = document.getElementById("scenarioTranscription");
     scenarioTranscriptionInner   = document.getElementById("scenarioTranscriptionInner");
     scenarioTitleCardElement = document.getElementById("scenarioTitleCard");
-    scenarioTopicNavElement = document.getElementById("scenarioTopicNav");
+    scenarioProgressBarElement = document.getElementById("scenarioProgressBar");
+    scenarioPauseBtnElement    = document.getElementById("pauseResumeBtn");
+
+    document.getElementById("backToSelectBtn").addEventListener("click", () => {
+        clearScenarioTimers();
+        stopLoadedScenarioSounds();
+        clearTranscription();
+        if (isVisualizerFrozen) { loop(); isVisualizerFrozen = false; }
+        document.getElementById("scenarioControls").classList.add("is-hidden");
+        showScenarioSelectScreen();
+    });
+
+    scenarioPauseBtnElement.addEventListener("click", () => {
+        userStartAudio();
+        if (isRealAudioActive && song && typeof song.isPlaying === "function" && song.isPlaying()) {
+            song.pause();
+            isRealAudioActive = false;
+            clearTimeout(scenarioAdvanceTimeout);
+            document.getElementById("playButton").textContent = "Play";
+            pauseTranscription();
+        } else if (song && isReady && !partEndHandled) {
+            resumeScenarioAudio();
+        }
+        updateScenarioControls();
+    });
 
     fileInput.addEventListener("change", loadSong);
     playButton.addEventListener("click", togglePlay);
@@ -471,7 +496,6 @@ function wireControls() {
     connectSlider("mouthWidth", "widthValue", value => value);
     connectSlider("mouthHeight", "heightValue", value => value);
     connectSlider("sensitivity", "sensitivityValue", value => (value / 100).toFixed(2));
-    renderScenarioTopicIndicators();
     renderScenarioLog(-1);
 
     // Resume the Web Audio context if the OS switches output devices mid-session
@@ -545,6 +569,7 @@ function showScenarioSelectScreen() {
 function hideScenarioSelectScreen() {
     currentScreen = "visualizer";
     document.getElementById("scenarioSelectScreen").classList.add("is-hidden");
+    document.getElementById("scenarioControls").classList.remove("is-hidden");
 }
 
 function showHomeScreen() {
@@ -794,139 +819,25 @@ function togglePlay() {
     }
 }
 
-function renderScenarioTopicIndicators() {
-    if (!scenarioTopicNavElement) return;
-
-    scenarioTopicNavElement.replaceChildren();
-    scenarioTopicButtons = SCENARIO_SEQUENCE.map((scenarioIndex, sequenceIndex) => {
-        const navLabel = SCENARIO_NAV_LABELS[sequenceIndex] || { letter: String(sequenceIndex + 1), name: "" };
-
-        const button   = document.createElement("button");
-        const iconEl   = document.createElement("span");
-        const letterEl = document.createElement("span");
-        const nameEl   = document.createElement("span");
-
-        button.type = "button";
-        button.className = "scenario-topic-button";
-        button.dataset.sequenceIndex = String(sequenceIndex);
-        button.setAttribute("aria-label", navLabel.letter + ": " + navLabel.name);
-
-        iconEl.className = "nav-icon";
-        iconEl.setAttribute("aria-hidden", "true");
-
-        letterEl.className = "scenario-topic-letter";
-        letterEl.textContent = navLabel.letter;
-        letterEl.setAttribute("aria-hidden", "true");
-
-        nameEl.className = "scenario-topic-name";
-        nameEl.textContent = navLabel.name;
-        nameEl.setAttribute("aria-hidden", "true");
-
-        const progressEl = document.createElement("div");
-        progressEl.className = "nav-progress";
-
-        button.append(iconEl, letterEl, nameEl, progressEl);
-        button.addEventListener("click", () => handleNavButtonTap(sequenceIndex));
-        scenarioTopicNavElement.appendChild(button);
-
-        return button;
-    });
-
-    updateScenarioTopicIndicators();
-}
-
-function restartScenarioTopic(sequenceIndex) {
-    const nextSequenceIndex = ((sequenceIndex % SCENARIO_SEQUENCE.length) + SCENARIO_SEQUENCE.length) % SCENARIO_SEQUENCE.length;
-
-    userStartAudio();
-
-    if (!isUploadedAudio && activeScenario && nextSequenceIndex === activeSequenceIndex && isReady && loadedScenarioSounds.length) {
-        restartActiveScenarioAudio();
-        return;
-    }
-
-    loadScenario(nextSequenceIndex, {
-        skipPromptTyping: true,
-        autoStartAudio: true
-    });
-}
-
-// Nav bar tap handler (replaces direct restartScenarioTopic calls from nav).
-// Active column → pause/resume. Inactive column → load & play that scenario.
-function handleNavButtonTap(sequenceIndex) {
-    userStartAudio();
-    resetIdleTimer();
-
-    if (!isUploadedAudio && sequenceIndex === activeSequenceIndex) {
-        // Active column: toggle pause / resume
-        if (isRealAudioActive && song && typeof song.isPlaying === "function" && song.isPlaying()) {
-            song.pause();
-            isRealAudioActive = false;
-            document.getElementById("playButton").textContent = "Play";
-        } else if (song && isReady) {
-            resumeScenarioAudio();
-        }
-    } else {
-        // Inactive column: immediately load and play the chosen scenario
-        loadScenario(sequenceIndex, { skipPromptTyping: true, autoStartAudio: true });
-    }
-}
-
-function restartActiveScenarioAudio() {
-    clearScenarioTimers();
-    stopLoadedScenarioSounds();
-
-    activePartIndex = 0;
-    song = loadedScenarioSounds[0];
-    isRealAudioActive = false;
-    scenarioHasStarted = false;
-    audioStartArmed = false;
-    partEndHandled = false;
-    pendingPartIndex = undefined;
-    scenarioVisibleLines = 0;
-    activeScenarioProgress = 0;
-
-    resetScenarioLog();
-    showScenarioTitleCard("");
-    clearTranscription();
-    if (isVisualizerFrozen) { loop(); isVisualizerFrozen = false; }
-    showPromptImmediately();
-    updateScenarioTopicIndicators();
-    startScenarioPart(0);
-}
-
 function updateScenarioTopicIndicators() {
-    if (!scenarioTopicButtons.length) return;
-
-    // Still need to call this every frame to keep activeScenarioProgress fresh
+    // Keep activeScenarioProgress fresh every frame
     updateActiveScenarioProgress();
 
-    const isPlaying = isRealAudioActive &&
-        song && typeof song.isPlaying === "function" && song.isPlaying();
+    updateScenarioControls();
+}
 
-    scenarioTopicButtons.forEach((button, sequenceIndex) => {
-        const isActive = !isUploadedAudio && sequenceIndex === activeSequenceIndex;
-        button.classList.toggle("is-active", isActive);
+function updateScenarioControls() {
+    if (scenarioProgressBarElement) {
+        scenarioProgressBarElement.style.width =
+            (activeScenarioProgress * 100).toFixed(1) + "%";
+    }
 
-        if (isActive) {
-            button.setAttribute("aria-current", "step");
-            const iconEl = button.querySelector(".nav-icon");
-            if (iconEl) {
-                // Only write to the DOM when the value actually changes
-                const nextIcon = isPlaying ? "⏸" : "▶";
-                if (iconEl.textContent !== nextIcon) iconEl.textContent = nextIcon;
-            }
-        } else {
-            button.removeAttribute("aria-current");
-        }
-
-        const progressEl = button.querySelector(".nav-progress");
-        if (progressEl) {
-            progressEl.style.width = isActive
-                ? (activeScenarioProgress * 100).toFixed(1) + "%"
-                : "0%";
-        }
-    });
+    if (scenarioPauseBtnElement) {
+        const isPlaying = isRealAudioActive &&
+            song && typeof song.isPlaying === "function" && song.isPlaying();
+        scenarioPauseBtnElement.classList.toggle("is-playing", isPlaying);
+        scenarioPauseBtnElement.setAttribute("aria-label", isPlaying ? "Pause" : "Play");
+    }
 }
 
 function updateActiveScenarioProgress() {
@@ -1189,6 +1100,7 @@ function resumeScenarioAudio() {
   partEndHandled = false;
   activePartStartedFrame = frameCount;
   document.getElementById("playButton").textContent = "Pause";
+  resumeTranscription();
 }
 
 function updateScenarioPlayback() {
@@ -1211,6 +1123,9 @@ function updateScenarioPlayback() {
 function handleScenarioPartEnded(partIndex = activePartIndex, playbackToken = activePlaybackToken) {
   if (isUploadedAudio || partEndHandled || !activeScenario) return;
   if (partIndex !== activePartIndex || playbackToken !== activePlaybackToken) return;
+  // If audio was deliberately paused, the onended event still fires (p5.sound calls
+  // stop() internally on pause). Bail out so we don't advance to the next part.
+  if (!isRealAudioActive) return;
 
   activeScenarioProgress = calculateScenarioProgress(true);
   partEndHandled = true;
@@ -1246,14 +1161,6 @@ function finishScenario() {
   document.getElementById("playButton").textContent = "Play";
   setStatus(activeScenario.label + " complete");
 
-  if (!document.getElementById("loopSound").checked) {
-    return;
-  }
-
-  clearTimeout(scenarioAdvanceTimeout);
-  scenarioAdvanceTimeout = setTimeout(() => {
-    loadScenario(activeSequenceIndex + 1);
-  }, BETWEEN_SCENARIOS_MS);
 }
 
 function setActiveSound(sound) {
@@ -1285,8 +1192,24 @@ function startTranscriptionTyping(text, rate = 1.0) {
   typeTranscriptionCharacter(0);
 }
 
+function pauseTranscription() {
+  clearTimeout(transcriptionTypeTimeout);
+  if (scenarioTranscriptionInner) {
+    scenarioTranscriptionInner.textContent = "PAUSED";
+    scenarioTranscriptionInner.style.transform = "";
+  }
+}
+
+function resumeTranscription() {
+  if (!scenarioTranscriptionInner || !activeTranscriptionText) return;
+  // Restore already-typed text then continue from saved index
+  scenarioTranscriptionInner.textContent = activeTranscriptionText.slice(0, activeTranscriptionIndex);
+  typeTranscriptionCharacter(activeTranscriptionIndex);
+}
+
 function typeTranscriptionCharacter(index) {
   if (!scenarioTranscriptionInner || !scenarioTranscriptionElement) return;
+  activeTranscriptionIndex = index;
   scenarioTranscriptionInner.textContent = activeTranscriptionText.slice(0, index);
   // Scroll inner content up so the latest text is always visible at bottom
   const overflow = Math.max(

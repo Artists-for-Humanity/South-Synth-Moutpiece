@@ -181,7 +181,7 @@
     .scenario-transcription {
       position: fixed;
       z-index: 9;         /* above scenario-copy (z-index 7) — overlaps log */
-      bottom: 536px;      /* 80 px above wave centre (wave = height − 456) */
+      bottom: 536px;      /* 136 px above wave centre (wave = height − 400) */
       left: 0;
       right: 0;
       height: 96px;
@@ -205,98 +205,121 @@
 
     /* ── Zone 4: Scenario nav bar (bottom 160 px) ───────────── */
 
-    .scenario-topic-nav {
+    /* ── Top progress bar ───────────────────────────────────── */
+
+    .scenario-progress-bar {
       position: fixed;
-      /* Above canvas (2), speech bubble (4), title-card (5); below log (7) */
-      z-index: 6;
-      bottom: 32px;
-      left: 0;
-      right: 0;
-      height: 160px;
-      width: 100%;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0 32px;
-      padding: 0 40px;
-      pointer-events: none;
-    }
-
-    .scenario-topic-button {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      height: 160px;
-      border: 4px solid #fff;
-      border-radius: 0;
-      background: #000;
-      color: #fff;
-      cursor: pointer;
-      pointer-events: auto;
-      text-align: center;
-      transition: background 200ms ease;
-    }
-
-    /* Progress bar — 8 px white line that fills from left across the button top */
-    .nav-progress {
-      position: absolute;
+      z-index: 15;
       top: 0;
       left: 0;
       width: 0%;
       height: 8px;
       background: #fff;
       transition: width 200ms linear;
+      pointer-events: none;
     }
 
-    /* Active column: Ship It! blue fill, no border */
-    .scenario-topic-button.is-active {
-      background: #0F62FE;
-      border: none;
+    /* ── Zone 4: Back + Pause controls (bottom 160 px) ──────── */
+
+    .scenario-controls {
+      position: fixed;
+      z-index: 6;
+      bottom: 32px;
+      left: 40px;
+      right: 40px;
+      height: 96px;
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      pointer-events: none;
     }
 
-    .scenario-topic-button:active {
-      opacity: 0.85;
-    }
-
-    /* Pause / play icon — only visible when column is active */
-    .scenario-topic-button .nav-icon {
+    .scenario-controls.is-hidden {
       display: none;
-      font-size: 40px;
-      line-height: 1;
+    }
+
+    .scenario-back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 160px;
+      height: 96px;
+      border: 4px solid #fff;
+      border-radius: 0;
+      background: #000;
       color: #fff;
-      font-family: system-ui, -apple-system, sans-serif;
+      text-align: center;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 32px;
       font-style: normal;
+      font-weight: 400;
+      line-height: 128%;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 120ms ease;
     }
 
-    .scenario-topic-button.is-active .nav-icon {
+    .scenario-back-btn:active {
+      opacity: 0.75;
+    }
+
+    .scenario-pause-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 96px;
+      height: 96px;
+      border: none;
+      border-radius: 0;
+      background: #0F62FE;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 120ms ease;
+    }
+
+    .scenario-pause-btn:active {
+      opacity: 0.80;
+    }
+
+    /* Default state: play triangle (pointing right) */
+    .scenario-pause-btn::before {
+      content: '';
       display: block;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 14px 0 14px 24px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 4px; /* optical centre */
     }
 
-    /* Letter (A / B / C) — hidden when active */
-    .scenario-topic-button .scenario-topic-letter {
-      display: block;
-      font-family: "IBM Plex Sans", system-ui, sans-serif;
-      font-size: 48px;
-      font-weight: 700;
-      line-height: 1;
-      color: #fff;
-    }
-
-    /* Scenario name — hidden when active */
-    .scenario-topic-button .scenario-topic-name {
-      display: block;
-      font-family: "IBM Plex Sans", system-ui, sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1.2;
-      color: #fff;
-    }
-
-    .scenario-topic-button.is-active .scenario-topic-letter,
-    .scenario-topic-button.is-active .scenario-topic-name {
+    .scenario-pause-btn::after {
       display: none;
+    }
+
+    /* Playing state: two vertical pause bars */
+    .scenario-pause-btn.is-playing::before {
+      width: 8px;
+      height: 32px;
+      background: #fff;
+      border: none;
+      border-width: 0;
+      border-color: transparent;
+      margin-left: 0;
+    }
+
+    .scenario-pause-btn.is-playing::after {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 32px;
+      background: #fff;
     }
 
     /* ── Zone 3: Speech bubble (between wave and nav) ────────── */
@@ -304,27 +327,24 @@
     .scenario-prompt-layer {
       position: fixed;
       z-index: 4;
-      /* 16px above nav bar top (nav-height 160 + nav-bottom 32 + gap 16 = 208) */
-      bottom: 208px;
-      left: 0;
-      right: 0;
+      /* 16px above controls top (controls-height 96 + bottom 32 + gap 16 = 144) */
+      bottom: 144px;
+      left: 40px;
+      right: 40px;
       display: flex;
-      justify-content: flex-end;
-      padding-right: 40px; /* flush with option C right edge */
       pointer-events: none;
     }
 
     .speech-bubble {
       position: relative;
       display: flex;
-      width: 555px;
-      height: 188px;
-      padding: 56px 40px;
+      width: 100%;
+      padding: 32px;
       justify-content: center;
       align-items: center;
       gap: 8px;
       background: #fff;
-      border-radius: 104px 104px 0 104px;
+      border-radius: 56px 56px 0px 56px;
     }
 
     .scenario-prompt-line {
@@ -548,31 +568,27 @@
         overflow: hidden;
       }
 
-      /* Nav bar: scale down for narrow screens */
-      .scenario-topic-nav {
-        height: 120px;
-        padding: 0 20px;
-      }
-
-      .scenario-topic-button {
+      /* Controls: scale down for narrow screens */
+      .scenario-controls {
+        left: 20px;
+        right: 20px;
         height: 120px;
       }
 
-      .scenario-topic-button .scenario-topic-letter {
-        font-size: 36px;
-      }
-
-      .scenario-topic-button .scenario-topic-name {
-        font-size: 16px;
+      .scenario-back-btn,
+      .scenario-pause-btn {
+        width: 160px;
+        height: 120px;
+        font-size: 24px;
       }
 
       /* Speech bubble: narrower on small screens */
       .scenario-prompt-layer {
-        bottom: 168px; /* nav-height 120 + nav-bottom 32 + gap 16 */
+        bottom: 168px; /* controls-height 120 + bottom 32 + gap 16 */
       }
 
       .speech-bubble {
-        width: calc(100vw - 64px);
+        width: 100%;
         padding: 20px 24px;
       }
 

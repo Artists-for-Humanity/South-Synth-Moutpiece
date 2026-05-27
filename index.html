@@ -54,7 +54,14 @@
 
   <div id="scenarioTranscription" class="scenario-transcription" aria-live="polite"><span id="scenarioTranscriptionInner"></span></div>
 
-  <nav id="scenarioTopicNav" class="scenario-topic-nav" aria-label="Scenario topics"></nav>
+  <!-- Top progress bar -->
+  <div id="scenarioProgressBar" class="scenario-progress-bar" aria-hidden="true"></div>
+
+  <!-- Bottom controls: back + pause (only visible in visualizer) -->
+  <div id="scenarioControls" class="scenario-controls is-hidden">
+    <button id="backToSelectBtn" class="scenario-back-btn" type="button">&#8249; Back</button>
+    <button id="pauseResumeBtn" class="scenario-pause-btn" type="button" aria-label="Play"></button>
+  </div>
 
   <section class="scenario-prompt-layer" aria-label="User prompt">
     <div class="speech-bubble">
