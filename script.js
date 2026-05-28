@@ -203,6 +203,7 @@ let audioStartTimeout;
 let promptTypeTimeout;
 let promptCompleteTimestamp = null;  // Date.now() when prompt typing finishes
 let audioStartTimestamp = null;      // Date.now() when each part's audio begins
+let scenarioEndedTimestamp = null;   // Date.now() when finishScenario() fires
 let scenarioAdvanceTimeout;
 let loadedScenarioSounds = [];
 let activeScenario;
@@ -717,6 +718,7 @@ function loadScenario(sequenceIndex, options = {}) {
     pendingPartIndex = undefined;
     promptCompleteTimestamp = null;
     audioStartTimestamp = null;
+    scenarioEndedTimestamp = null;
     scenarioVisibleLines = 0;
     activeScenarioProgress = 0;
     resetScenarioLog();
@@ -917,6 +919,17 @@ function updateScenarioControls() {
         scenarioPauseBtnElement.classList.toggle("is-ended", scenarioIsEnded);
         scenarioPauseBtnElement.setAttribute("aria-label",
             scenarioIsEnded ? "Restart" : showPauseIcon ? "Pause" : "Play");
+    }
+
+    const explainBtn = document.getElementById("explainBtn");
+    if (explainBtn) {
+        const scenarioIsEnded = currentScreen === "visualizer" &&
+            !scenarioHasStarted && !isRealAudioActive &&
+            activeScenarioProgress >= 1;
+        const explainVisible = scenarioIsEnded &&
+            scenarioEndedTimestamp !== null &&
+            (Date.now() - scenarioEndedTimestamp >= 1000);
+        explainBtn.classList.toggle("is-hidden", !explainVisible);
     }
 }
 
@@ -1274,6 +1287,7 @@ function finishScenario() {
   audioStartArmed = false;
   pendingPartIndex = undefined;
   activeScenarioProgress = 1;
+  scenarioEndedTimestamp = Date.now();
   showScenarioTitleCard("");
   document.getElementById("playButton").textContent = "Play";
   setStatus(activeScenario.label + " complete");

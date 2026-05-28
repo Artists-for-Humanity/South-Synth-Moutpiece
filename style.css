@@ -135,7 +135,7 @@
       height: 320px;
       display: flex;
       align-items: flex-start;
-      justify-content: center;
+      justify-content: flex-start;
       padding: 12px 40px;
       background: #000;
       overflow: hidden;
@@ -161,11 +161,11 @@
       width: 100%;
       color: rgba(243, 229, 255, 0.40);
       font-family: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
-      font-size: 24px;
+      font-size: 18px;
       font-style: normal;
       font-weight: 500;
-      line-height: 36px;
-      text-align: center;
+      line-height: 20px;
+      text-align: left;
       letter-spacing: -1.68px;
       text-shadow: none;
       transition: transform 100ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -176,12 +176,16 @@
       overflow-wrap: anywhere;
     }
 
+    .scenario-log-line::before {
+      content: '[System Log]: ';
+    }
+
     /* ── Zone 1b: Transcribed audio (just below log, above waves) ── */
 
     .scenario-transcription {
       position: fixed;
       z-index: 9;         /* above scenario-copy (z-index 7) — overlaps log */
-      bottom: 568px;      /* 168 px above wave centre (wave = height − 400) */
+      bottom: 544px;      /* 144 px above wave centre (wave = height − 400) */
       left: 0;
       right: 0;
       height: 96px;
@@ -314,6 +318,11 @@
 
     .scenario-explain-btn:active {
       opacity: 0.75;
+    }
+
+    .scenario-explain-btn.is-hidden {
+      visibility: hidden;
+      pointer-events: none;
     }
 
     /* ── Bias explanation screen ─────────────────────────────── */
