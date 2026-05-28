@@ -555,6 +555,12 @@ function initHomeScreen() {
         btn.addEventListener("click", () => handleScenarioSelect(btn.dataset.scenarioKey));
     });
 
+    // Hidden reset: tap the heading on the scenario select screen to return home
+    const selectHeading = document.querySelector(".scenario-select-heading");
+    if (selectHeading) {
+        selectHeading.addEventListener("click", showHomeScreen);
+    }
+
     // Any touch anywhere on the experience (outside home screen) resets the
     // idle timer so a visitor actively watching won't get kicked to home.
     document.addEventListener("touchstart", onUserActivity, { passive: true });

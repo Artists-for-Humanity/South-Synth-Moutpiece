@@ -545,7 +545,7 @@
     }
 
     .home-quote {
-      margin: 0 0 64px;
+      margin: 0 0 80px;
       color: #fff;
       font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
       font-size: 64px;
@@ -562,6 +562,32 @@
       font-style: normal;
       font-weight: 600;
       line-height: 40px;
+    }
+
+    .home-bullets {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .home-bullets li {
+      color: #fff;
+      font-family: "IBM Plex Sans Condensed", system-ui, -apple-system, sans-serif;
+      font-size: 40px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 48px;
+      padding-left: 32px;
+      position: relative;
+    }
+
+    .home-bullets li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
     }
 
     .home-start-btn {
