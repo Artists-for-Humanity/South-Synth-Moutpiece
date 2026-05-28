@@ -483,12 +483,14 @@ function wireControls() {
     scenarioPauseBtnElement     = document.getElementById("pauseResumeBtn");
 
     document.getElementById("backToSelectBtn").addEventListener("click", () => {
-        clearScenarioTimers();
-        stopLoadedScenarioSounds();
-        clearTranscription();
         if (isVisualizerFrozen) { loop(); isVisualizerFrozen = false; }
+        clearTranscription();
+        if (scenarioPromptElement) scenarioPromptElement.textContent = "";
         document.getElementById("scenarioControls").classList.add("is-hidden");
         showScenarioSelectScreen();
+        // Reloads audio silently and resets all scenario state (log, title card,
+        // progress, timestamps) — mirrors the full reset done by showHomeScreen.
+        loadScenario(activeSequenceIndex, { preloadOnly: true });
     });
 
     document.getElementById("explainBtn").addEventListener("click", () => {
