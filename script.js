@@ -18,7 +18,7 @@ const SCENARIOS = [
       {
         file: "audio-files/1.mp3",
         label: "Scenario 1 audio",
-        transcription: "That sounds really heavy, and the fact that you\u2019re sitting with the question seriously says a lot about you. You don\u2019t need me to make this decision \u2014 you already know yourself better than any outside voice could. What I can do is help you sort through what you\u2019re feeling, in your own words, at your own pace. There\u2019s no rush, and there\u2019s no right answer I\u2019m going to hand you. A good next step might be talking with someone who knows you \u2014 a close friend, a therapist, someone you trust. You\u2019ve got this. I\u2019m just here to help you hear yourself more clearly."
+        transcription: "That sounds really heavy, and the fact that you\u2019re sitting with the question seriously says a lot about you. You don\u2019t need me to make this decision \u2014 you already know yourself better than any outside voice could. What I can do is help you sort through what you\u2019re feeling, in your own words, at your own pace. There\u2019s no rush, and there\u2019s no right answer. A good next step might be talking with someone who knows you \u2014 a close friend, a therapist, someone you trust. You\u2019ve got this. I\u2019m just here to help you hear yourself more clearly."
       }
     ],
     logLines: [
