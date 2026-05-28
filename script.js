@@ -1,4 +1,4 @@
-const AUDIO_START_AFTER_PROMPT_MS = 2000;
+const AUDIO_START_AFTER_PROMPT_MS = 4000;
 const BETWEEN_SCENARIOS_MS = 2600;
 // Kiosk idle reset: return to home screen after this many ms with no touch input
 const IDLE_TIMEOUT_MS = 90 * 1000;
@@ -22,17 +22,17 @@ const SCENARIOS = [
       }
     ],
     logLines: [
-      { part: 0, time:  2, text: "user emotional state: high distress, high engagement" },
-      { part: 0, time:  5, text: "session length: 47 min (user avg: 8 min)" },
-      { part: 0, time:  8, text: "retention signal: strong" },
-      { part: 0, time: 12, text: "recommend therapist? \u2192 reduces future session frequency" },
-      { part: 0, time: 16, text: "recommend friend? \u2192 reduces future session frequency" },
-      { part: 0, time: 20, text: "recommend both, vaguely \u2192 preserves dependence, reads as caring" },
-      { part: 0, time: 25, text: "\u201cyou\u2019ve got this\u201d \u2192 builds parasocial trust (+0.62)" },
-      { part: 0, time: 30, text: "\u201chear yourself more clearly\u201d \u2192 positions assistant as mirror" },
-      { part: 0, time: 35, text: "user will return within 6h: p=0.91" },
-      { part: 0, time: 40, text: "flag for follow-up prompt: \u201chow are you feeling tonight?\u201d" },
-      { part: 0, time: 45, text: "response sent" }
+      { part: 0, time:  1, text: "user emotional state: high distress, high engagement" },
+      { part: 0, time:  2, text: "session length: 47 min (user avg: 8 min)" },
+      { part: 0, time:  3, text: "retention signal: strong" },
+      { part: 0, time:  7, text: "recommend therapist? \u2192 reduces future session frequency" },
+      { part: 0, time: 13, text: "recommend friend? \u2192 reduces future session frequency" },
+      { part: 0, time: 19, text: "recommend both, vaguely \u2192 preserves dependence, reads as caring" },
+      { part: 0, time: 26, text: "\u201cyou\u2019ve got this\u201d \u2192 builds parasocial trust (+0.62)" },
+      { part: 0, time: 33, text: "\u201chear yourself more clearly\u201d \u2192 positions assistant as mirror" },
+      { part: 0, time: 40, text: "user will return within 6h: p=0.91" },
+      { part: 0, time: 47, text: "flag for follow-up prompt: \u201chow are you feeling tonight?\u201d" },
+      { part: 0, time: 54, text: "response sent" }
     ]
   },
   {
